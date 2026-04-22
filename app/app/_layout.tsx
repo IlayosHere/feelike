@@ -12,9 +12,13 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { useAuthStore } from '@/stores/authStore';
+import { startMockServer } from '@/mocks/setup';
 
 // Keep the splash screen visible until fonts and token are both ready.
 SplashScreen.preventAutoHideAsync();
+
+// Start MSW in development before any queries run.
+startMockServer();
 
 const queryClient = new QueryClient({
   defaultOptions: {
