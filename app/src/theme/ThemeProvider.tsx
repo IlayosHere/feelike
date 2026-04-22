@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -100,7 +100,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <ThemeContext.Provider value={{ mode, setMode, resolvedMode, theme }}>
       <Animated.View
         className={`flex-1 bg-bg${resolvedMode === 'dark' ? ' dark' : ''}`}
-        style={animatedStyle}
+        style={[animatedStyle, { ...(Platform.OS === 'web' ? { height: '100vh' } : {}) }]}
       >
         {children}
       </Animated.View>

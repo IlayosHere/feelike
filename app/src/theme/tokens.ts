@@ -4,90 +4,74 @@
 export const primitives = {
   // --- Brand core palette ---
   coral: {
-    50: '#FFF0F2',
-    100: '#FFD6DC',
-    200: '#FFADB8',
-    300: '#FF8595',
-    400: '#FF5D73',
-    500: '#E64563',
-    600: '#C73050',
-    700: '#A01E3B',
+    50:  '#FFE9ED',
+    100: '#FFC8D1',
+    300: '#FF8A9D',
+    500: '#FF5D73',
+    600: '#E64563',
+    700: '#BF3551',
   },
   peach: {
-    // grad-primary terminus: coral → peach (135deg)
-    400: '#FF9A6B',
+    300: '#FFB997',
+    500: '#FF9A6B',
   },
   indigo: {
-    50: '#F4F4FF',
-    100: '#E8E8FF',
-    200: '#C8C8F5',
-    300: '#A8A8EB',
-    400: '#8888E0',
-    500: '#6868D5',
-    600: '#4C4CBF',
-    700: '#3333A0',
+    300: '#A5A5E2',
+    500: '#7F7FD5',
+    700: '#5E5EBA',
   },
   sky: {
+    300: '#B6D0F0',
     500: '#86A8E7',
   },
   mint: {
+    300: '#B3E8D1',
     500: '#91EAE4',
   },
 
   // --- Ink ramp ---
   ink: {
-    50: '#FAFAFF',
-    100: '#F4F4FB',
-    200: '#EDEDF5',
-    300: '#DADAEA',
-    400: '#B8B8CC',
-    500: '#9B9BAD',
-    600: '#6E6E8A',
-    700: '#5A5A63',
-    800: '#3A3A44',
-    900: '#26262E',
-    950: '#16161C',
+    50:  '#F5F5F7',
+    100: '#E8E8EE',
+    200: '#CDCDD7',
+    300: '#9B9BAD',
+    400: '#6E6E8A',
+    500: '#4B4B64',
+    700: '#26262E',
+    800: '#16161C',
+    900: '#0B0B0F',
+    950: '#050507',
   },
-  white: '#FFFFFF',
-  offWhite: '#F5F5F7',
-  black: '#0B0B0F',
+  white:    '#FFFFFF',
+  offWhite: '#FAFAFF',
 
   // --- Status ---
-  success: {
-    500: '#4AC28A',
-    600: '#5DD69F',
-  },
-  danger: {
-    500: '#E85D5D',
-    600: '#F07878',
-  },
-  warning: {
-    500: '#F2B040',
-    600: '#F5C061',
-  },
+  success: '#4AC28A',
+  danger:  '#E85D5D',
+  warning: '#F2B040',
 
   // --- Shadows (as style objects, not hex) ---
   shadow: {
     light: {
       sm: {
-        shadowColor: '#0B0B0F',
+        shadowColor: '#7F7FD5',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 2,
+        shadowOpacity: 0.08,
+        shadowRadius: 3,
         elevation: 1,
       },
       md: {
-        shadowColor: '#0B0B0F',
+        shadowColor: '#7F7FD5',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
+        shadowOpacity: 0.1,
+        shadowRadius: 14,
         elevation: 4,
       },
       lg: {
-        shadowColor: '#0B0B0F',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.12,
-        shadowRadius: 24,
+        shadowColor: '#7F7FD5',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.15,
+        shadowRadius: 30,
         elevation: 8,
       },
     },
@@ -95,22 +79,22 @@ export const primitives = {
       sm: {
         shadowColor: '#000000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        shadowOpacity: 0.4,
+        shadowRadius: 3,
         elevation: 1,
       },
       md: {
         shadowColor: '#000000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
+        shadowOpacity: 0.5,
+        shadowRadius: 14,
         elevation: 4,
       },
       lg: {
         shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.4,
-        shadowRadius: 24,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.6,
+        shadowRadius: 30,
         elevation: 8,
       },
     },
@@ -119,50 +103,52 @@ export const primitives = {
 
 export const lightTheme = {
   // --- Backgrounds ---
-  bg: primitives.ink[50],              // #FAFAFF
-  bgSubtle: primitives.ink[100],       // #F4F4FB
-  surface: primitives.white,           // #FFFFFF
-  surfaceRaised: primitives.white,     // #FFFFFF
-  surfaceSunken: primitives.ink[100],  // #F4F4FB
+  bg:            primitives.offWhite,       // #FAFAFF
+  bgSubtle:      '#F4F4FB',
+  surface:       primitives.white,          // #FFFFFF
+  surfaceRaised: primitives.white,          // #FFFFFF
+  surfaceSunken: '#F4F4FB',
 
   // --- Text ---
-  textPrimary: primitives.black,       // #0B0B0F
-  textSecondary: primitives.ink[600],  // #6E6E8A
-  textMuted: primitives.ink[500],      // #9B9BAD
-  textOnAccent: primitives.white,      // #FFFFFF
+  textPrimary:   primitives.ink[900],       // #0B0B0F
+  textSecondary: primitives.ink[400],       // #6E6E8A
+  textMuted:     primitives.ink[300],       // #9B9BAD
+  textOnAccent:  primitives.white,          // #FFFFFF
 
   // --- Accent (coral) ---
-  accent: primitives.coral[400],       // #FF5D73
-  accentHover: primitives.coral[500],  // #E64563
-  accentMuted: '#FFC8D1',
-  accentSubtle: '#FFE9ED',
+  accent:        primitives.coral[500],     // #FF5D73
+  accentHover:   primitives.coral[600],     // #E64563
+  accentMuted:   primitives.coral[100],     // #FFC8D1
+  accentSubtle:  primitives.coral[50],      // #FFE9ED
 
   // --- Borders ---
-  border: primitives.ink[200],         // #EDEDF5
-  borderStrong: primitives.ink[300],   // #DADAEA
-  divider: '#F0F0F8',
+  border:        '#EDEDF5',
+  borderStrong:  '#DADAEA',
+  divider:       '#F0F0F8',
 
   // --- Status ---
-  success: primitives.success[500],   // #4AC28A
-  danger: primitives.danger[500],     // #E85D5D
-  warning: primitives.warning[500],   // #F2B040
+  success: primitives.success,              // #4AC28A
+  danger:  primitives.danger,               // #E85D5D
+  warning: primitives.warning,              // #F2B040
 
   // --- Overlay ---
   overlay: 'rgba(11,11,15,0.5)',
 
   // --- Tag palette ---
-  tagPinkBg: '#FFE4EC',
-  tagPinkInk: '#C73E5A',
-  tagBlueBg: '#E4F3FF',
-  tagBlueInk: '#2D6FBF',
-  tagGreenBg: '#E8F6E4',
+  tagPinkBg:   '#FFE4EC',
+  tagPinkInk:  '#C73E5A',
+  tagBlueBg:   '#E4F3FF',
+  tagBlueInk:  '#2D6FBF',
+  tagGreenBg:  '#E8F6E4',
   tagGreenInk: '#4A8E3A',
   tagPurpleBg: '#EEE4FF',
-  tagPurpleInk: '#6B3FB8',
+  tagPurpleInk:'#6B3FB8',
 
   // --- Gradients ---
-  gradPrimaryStart: primitives.coral[400],  // #FF5D73
-  gradPrimaryEnd: primitives.peach[400],    // #FF9A6B
+  gradPrimaryStart: primitives.coral[500],   // #FF5D73
+  gradPrimaryEnd:   primitives.peach[500],   // #FF9A6B
+  gradBrandStart:   primitives.coral[500],   // #FF5D73
+  gradBrandEnd:     primitives.indigo[500],  // #7F7FD5
 
   // --- Shadows ---
   shadowSm: primitives.shadow.light.sm,
@@ -172,50 +158,52 @@ export const lightTheme = {
 
 export const darkTheme = {
   // --- Backgrounds ---
-  bg: primitives.black,                // #0B0B0F
-  bgSubtle: primitives.ink[950],       // #16161C
-  surface: primitives.ink[950],        // #16161C
+  bg:            primitives.ink[900],        // #0B0B0F
+  bgSubtle:      primitives.ink[800],        // #16161C
+  surface:       primitives.ink[800],        // #16161C
   surfaceRaised: '#1D1D24',
-  surfaceSunken: primitives.black,     // #0B0B0F
+  surfaceSunken: primitives.ink[900],        // #0B0B0F
 
   // --- Text ---
-  textPrimary: primitives.offWhite,    // #F5F5F7
-  textSecondary: primitives.ink[500],  // #9B9BAD
-  textMuted: primitives.ink[700],      // #5A5A63
-  textOnAccent: primitives.white,      // #FFFFFF
+  textPrimary:   primitives.ink[50],         // #F5F5F7
+  textSecondary: primitives.ink[300],        // #9B9BAD
+  textMuted:     '#5A5A63',
+  textOnAccent:  primitives.white,           // #FFFFFF
 
-  // --- Accent (coral, lighter for dark bg) ---
-  accent: '#FF8A9D',
-  accentHover: primitives.coral[400],  // #FF5D73
-  accentMuted: 'rgba(255,138,157,0.18)',
-  accentSubtle: 'rgba(255,138,157,0.08)',
+  // --- Accent (desaturated coral for dark bg) ---
+  accent:        primitives.coral[300],      // #FF8A9D
+  accentHover:   primitives.coral[500],      // #FF5D73
+  accentMuted:   'rgba(255,138,157,0.18)',
+  accentSubtle:  'rgba(255,138,157,0.08)',
 
   // --- Borders ---
-  border: primitives.ink[900],         // #26262E
-  borderStrong: '#32323C',
-  divider: '#1F1F26',
+  border:        '#26262E',
+  borderStrong:  '#32323C',
+  divider:       '#1F1F26',
 
   // --- Status ---
-  success: primitives.success[600],   // #5DD69F
-  danger: primitives.danger[600],     // #F07878
-  warning: primitives.warning[600],   // #F5C061
+  success: '#5DD69F',
+  danger:  '#F07878',
+  warning: '#F5C061',
 
   // --- Overlay ---
   overlay: 'rgba(0,0,0,0.6)',
 
   // --- Tag palette ---
-  tagPinkBg: 'rgba(255,93,115,0.15)',
-  tagPinkInk: '#FFA3B2',
-  tagBlueBg: 'rgba(134,168,231,0.15)',
-  tagBlueInk: '#B6D0F0',
-  tagGreenBg: 'rgba(145,234,228,0.12)',
-  tagGreenInk: '#9ADDC8',
-  tagPurpleBg: 'rgba(127,127,213,0.18)',
+  tagPinkBg:    'rgba(255,93,115,0.15)',
+  tagPinkInk:   '#FFA3B2',
+  tagBlueBg:    'rgba(134,168,231,0.15)',
+  tagBlueInk:   '#B6D0F0',
+  tagGreenBg:   'rgba(145,234,228,0.12)',
+  tagGreenInk:  '#9ADDC8',
+  tagPurpleBg:  'rgba(127,127,213,0.18)',
   tagPurpleInk: '#B9B9EA',
 
   // --- Gradients ---
-  gradPrimaryStart: primitives.coral[400],  // #FF5D73 — same in dark; accent is lighter but gradient stays brand
-  gradPrimaryEnd: primitives.peach[400],    // #FF9A6B
+  gradPrimaryStart: primitives.coral[500],   // #FF5D73 — gradient stays brand in dark
+  gradPrimaryEnd:   primitives.peach[500],   // #FF9A6B
+  gradBrandStart:   primitives.coral[500],   // #FF5D73
+  gradBrandEnd:     primitives.indigo[500],  // #7F7FD5
 
   // --- Shadows ---
   shadowSm: primitives.shadow.dark.sm,

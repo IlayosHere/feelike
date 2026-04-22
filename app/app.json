@@ -32,19 +32,8 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./assets/fonts/DMSans-Regular.ttf",
-            "./assets/fonts/DMSans-Medium.ttf",
-            "./assets/fonts/DMSans-SemiBold.ttf",
-            "./assets/fonts/DMSans-Bold.ttf",
-            "./assets/fonts/DMSans-ExtraBold.ttf"
-          ]
-        }
-      ],
-      "expo-splash-screen"
+      "expo-splash-screen",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

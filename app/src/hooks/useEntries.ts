@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiClient } from '@/services/apiClient';
+import { useAuthStore } from '@/stores/authStore';
 
 const MoodValueSchema = z.enum(['happy', 'excited', 'sad', 'anxious', 'angry', 'calm']);
 
@@ -21,8 +22,10 @@ const PaginatedEntriesSchema = z.object({
 const PAGE_LIMIT = 20;
 
 export function useEntries() {
+  const token = useAuthStore((s) => s.token);
   return useInfiniteQuery({
     queryKey: ['entries'],
+    enabled: !!token,
     initialPageParam: null as string | null,
     queryFn: async ({ pageParam }) => {
       const cursor = pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : '';

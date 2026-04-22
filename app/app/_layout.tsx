@@ -1,24 +1,19 @@
-import React, { useEffect } from 'react';
+import '../global.css';
+import React, { useEffect, useState } from 'react';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import {
   DMSans_400Regular,
   DMSans_500Medium,
-  DMSans_600SemiBold,
   DMSans_700Bold,
-  DMSans_800ExtraBold,
 } from '@expo-google-fonts/dm-sans';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { useAuthStore } from '@/stores/authStore';
 import { startMockServer } from '@/mocks/setup';
 
-// Keep the splash screen visible until fonts and token are both ready.
 SplashScreen.preventAutoHideAsync();
-
-// Start MSW in development before any queries run.
-startMockServer();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,28 +27,30 @@ const queryClient = new QueryClient({
 export default function RootLayout() {
   const loadToken = useAuthStore((s) => s.loadToken);
   const isTokenLoading = useAuthStore((s) => s.isLoading);
+  const [mockReady, setMockReady] = useState(false);
 
   const [fontsLoaded] = useFonts({
     DMSans_400Regular,
     DMSans_500Medium,
-    DMSans_600SemiBold,
     DMSans_700Bold,
-    DMSans_800ExtraBold,
   });
 
-  // Load the persisted auth token once on mount.
+  // Start MSW and load token before rendering anything.
   useEffect(() => {
-    loadToken();
+    startMockServer().then(() => {
+      setMockReady(true);
+      loadToken();
+    });
   }, [loadToken]);
 
-  // Hide splash once both fonts and token state are ready.
+  // Hide splash once everything is ready.
   useEffect(() => {
-    if (fontsLoaded && !isTokenLoading) {
+    if (fontsLoaded && !isTokenLoading && mockReady) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, isTokenLoading]);
+  }, [fontsLoaded, isTokenLoading, mockReady]);
 
-  if (!fontsLoaded || isTokenLoading) {
+  if (!fontsLoaded || isTokenLoading || !mockReady) {
     return null;
   }
 

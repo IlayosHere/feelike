@@ -76,15 +76,22 @@ export function AuthScreen() {
         >
           {/* Brand space */}
           <View className="items-center justify-center px-4 py-10">
-            <Text
-              className="text-text-primary text-5xl font-bold tracking-tight mb-2"
-              accessibilityRole="header"
-            >
-              feelike
-            </Text>
-            <Text className="text-text-secondary text-base">
-              Your thoughts, privately.
-            </Text>
+            <View className="items-center mb-4">
+              <View className="w-20 h-20 rounded-2xl bg-accent items-center justify-center mb-4 shadow-md"
+                style={{ shadowColor: '#FF5D73', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8 }}
+              >
+                <Text style={{ fontSize: 38, lineHeight: 44 }}>{'🫀'}</Text>
+              </View>
+              <Text
+                className="text-text-primary text-5xl font-bold tracking-tight mb-1"
+                accessibilityRole="header"
+              >
+                feelike
+              </Text>
+              <Text className="text-text-secondary text-base">
+                Your thoughts, privately.
+              </Text>
+            </View>
           </View>
 
           {/* Auth card */}
