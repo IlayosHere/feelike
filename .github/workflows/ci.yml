@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Always-runs guard so the CI status reflects reality even when app/ or backend/
+  # don't exist yet. When real code lands, this job still runs alongside the others.
+  ci-guard:
+    name: CI guard (docs & workflow sanity)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate YAML workflows
+        run: |
+          python3 -c "import yaml, pathlib; [yaml.safe_load(p.read_text()) for p in pathlib.Path('.github/workflows').glob('*.yml')]"
+      - name: Check for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  lint-backend:
+    name: Backend lint & type-check
+    runs-on: ubuntu-24.04
+    if: ${{ hashFiles('backend/requirements.txt') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff mypy
+
+      - name: Ruff
+        working-directory: backend
+        run: ruff check .
+
+      - name: Mypy
+        working-directory: backend
+        run: mypy api
+
+  test-backend:
+    name: Backend tests
+    runs-on: ubuntu-24.04
+    if: ${{ hashFiles('backend/requirements.txt') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run tests
+        working-directory: backend
+        env:
+          DATABASE_URL: "sqlite:///./test.db"
+          JWT_SECRET: "test-secret-not-for-prod"
+        run: pytest -v
+
+  lint-app:
+    name: Mobile lint & type-check
+    runs-on: ubuntu-24.04
+    if: ${{ hashFiles('app/package.json') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci
+
+      - name: ESLint
+        working-directory: app
+        run: npm run lint
+
+      - name: Type-check
+        working-directory: app
+        run: npm run typecheck
+
+  test-app:
+    name: Mobile tests
+    runs-on: ubuntu-24.04
+    if: ${{ hashFiles('app/package.json') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci
+
+      - name: Run tests
+        working-directory: app
+        run: npm test -- --watchAll=false
