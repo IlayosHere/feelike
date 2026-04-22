@@ -1,54 +1,37 @@
-/**
- * Shared test utility: wraps a component in QueryClientProvider + a real
- * ThemeProvider backed by mocked AsyncStorage and expo-splash-screen.
- *
- * Each call creates a fresh QueryClient so tests are isolated.
- */
-
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, type RenderOptions } from '@testing-library/react-native';
-import { ThemeProvider } from '@/theme/ThemeProvider';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+import { ThemeContext, type ThemeContextValue } from '@/theme/ThemeContext';
+import { lightTheme } from '@/theme/tokens';
 
 function makeQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
-      queries: {
-        // Never retry in tests — fail fast.
-        retry: false,
-        // Disable background refetching so tests stay deterministic.
-        staleTime: Infinity,
-      },
-      mutations: {
-        retry: false,
-      },
+      queries: { retry: false, staleTime: Infinity },
+      mutations: { retry: false },
     },
   });
 }
 
-// ---------------------------------------------------------------------------
-// Wrapper
-// ---------------------------------------------------------------------------
+// Synchronous stub — avoids async AsyncStorage reads that cause act() warnings
+// when the real ThemeProvider is used in non-theme tests.
+const stubThemeValue: ThemeContextValue = {
+  mode: 'auto',
+  setMode: jest.fn(),
+  resolvedMode: 'light',
+  theme: lightTheme,
+};
 
-type WrapperProps = { children: React.ReactNode };
-
-function AllProviders({ children }: WrapperProps) {
-  // QueryClient is created once per wrapper instance (i.e. per test).
+function AllProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = React.useState(() => makeQueryClient());
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>{children}</ThemeProvider>
+      <ThemeContext.Provider value={stubThemeValue}>
+        {children}
+      </ThemeContext.Provider>
     </QueryClientProvider>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Export
-// ---------------------------------------------------------------------------
 
 export function renderWithProviders(
   ui: React.ReactElement,
@@ -57,8 +40,6 @@ export function renderWithProviders(
   return render(ui, { wrapper: AllProviders, ...options });
 }
 
-/** Expose a bare QueryClientProvider wrapper for cases where ThemeProvider
- *  is not needed (e.g. hook-only tests). */
 export function makeTestQueryClient() {
   return makeQueryClient();
 }

@@ -1,9 +1,13 @@
 module.exports = function (api) {
-  api.cache(true);
+  // api.env() invalidates the cache per environment, so use invalidate() not true.
+  const isTest = api.env('test');
+  api.cache.invalidate(() => isTest);
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      'nativewind/babel',
+      // nativewind/babel is a Metro-only transform; skip it in Jest to avoid
+      // @babel/core plugin validation errors in the jest-expo test environment.
+      ...(!isTest ? ['nativewind/babel'] : []),
       [
         'module-resolver',
         {
@@ -11,6 +15,7 @@ module.exports = function (api) {
           alias: { '@': './src' },
         },
       ],
+      // reanimated/plugin must remain last
       'react-native-reanimated/plugin',
     ],
   };
