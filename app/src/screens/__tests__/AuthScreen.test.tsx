@@ -98,23 +98,23 @@ describe('AuthScreen', () => {
   });
 
   it('switching to Sign Up tab renders the sign-up form (password strength bar visible after typing)', async () => {
-    const { getByRole, getByLabelText } = renderWithProviders(<AuthScreen />);
+    const { getByLabelText } = renderWithProviders(<AuthScreen />);
 
     await act(async () => {});
 
+    // Press the Sign Up tab by its accessibilityLabel
     await act(async () => {
-      fireEvent.press(getByRole('tab', { name: 'Sign Up' }));
+      fireEvent.press(getByLabelText('Sign Up'));
     });
 
-    // The sign-up form renders the same Password input — entering text makes
-    // the PasswordStrengthBar appear (it returns null while password is empty).
+    // Type into the password field to trigger the strength bar
     const passwordInput = getByLabelText('Password');
     await act(async () => {
       fireEvent.changeText(passwordInput, 'test123');
     });
 
-    // PasswordStrengthBar has accessibilityRole="progressbar"
-    expect(getByRole('progressbar')).toBeTruthy();
+    // PasswordStrengthBar renders with accessibilityLabel "Weak password" / "Fair password" / "Strong password"
+    expect(getByLabelText('Weak password')).toBeTruthy();
   });
 
   it('Sign In button is present and pressable when fields are empty (validation fires on submit, not on field state)', async () => {

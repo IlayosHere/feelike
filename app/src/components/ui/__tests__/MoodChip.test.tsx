@@ -52,10 +52,11 @@ function renderChip(overrides: Partial<React.ComponentProps<typeof MoodChip>> = 
 // ---------------------------------------------------------------------------
 
 describe('MoodChip', () => {
-  it('renders the emoji', () => {
-    const { getByText } = renderChip({ emoji: '😔', label: 'Sad' });
+  it('renders the chip with correct accessibility label', () => {
+    const { getByRole } = renderChip({ emoji: '😔', label: 'Sad' });
 
-    expect(getByText('😔')).toBeTruthy();
+    // Emoji text has accessibilityElementsHidden — query the chip by its label.
+    expect(getByRole('button', { name: 'Sad mood' })).toBeTruthy();
   });
 
   it('has accessibilityRole="button"', () => {

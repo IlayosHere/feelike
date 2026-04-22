@@ -15,8 +15,9 @@ module.exports = function (api) {
           alias: { '@': './src' },
         },
       ],
-      // reanimated/plugin must remain last
-      'react-native-reanimated/plugin',
+      // reanimated/plugin requires react-native-worklets in Reanimated 4 — skip in
+      // Jest since jest-expo fully mocks Reanimated via its preset.
+      ...(!isTest ? ['react-native-reanimated/plugin'] : []),
     ],
   };
 };
