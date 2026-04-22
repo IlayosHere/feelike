@@ -13,6 +13,10 @@ export const primitives = {
     600: '#C73050',
     700: '#A01E3B',
   },
+  peach: {
+    // grad-primary terminus: coral → peach (135deg)
+    400: '#FF9A6B',
+  },
   indigo: {
     50: '#F4F4FF',
     100: '#E8E8FF',
@@ -156,6 +160,10 @@ export const lightTheme = {
   tagPurpleBg: '#EEE4FF',
   tagPurpleInk: '#6B3FB8',
 
+  // --- Gradients ---
+  gradPrimaryStart: primitives.coral[400],  // #FF5D73
+  gradPrimaryEnd: primitives.peach[400],    // #FF9A6B
+
   // --- Shadows ---
   shadowSm: primitives.shadow.light.sm,
   shadowMd: primitives.shadow.light.md,
@@ -204,6 +212,10 @@ export const darkTheme = {
   tagGreenInk: '#9ADDC8',
   tagPurpleBg: 'rgba(127,127,213,0.18)',
   tagPurpleInk: '#B9B9EA',
+
+  // --- Gradients ---
+  gradPrimaryStart: primitives.coral[400],  // #FF5D73 — same in dark; accent is lighter but gradient stays brand
+  gradPrimaryEnd: primitives.peach[400],    // #FF9A6B
 
   // --- Shadows ---
   shadowSm: primitives.shadow.dark.sm,
