@@ -1,0 +1,63 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ['./app/**/*.{js,ts,jsx,tsx}', './src/**/*.{js,ts,jsx,tsx}'],
+  presets: [require('nativewind/preset')],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        // Semantic tokens — light defaults, dark: overrides
+        bg: { DEFAULT: '#FAFAFF', dark: '#0B0B0F' },
+        'bg-subtle': { DEFAULT: '#F4F4FB', dark: '#16161C' },
+        surface: { DEFAULT: '#FFFFFF', dark: '#16161C' },
+        'surface-raised': { DEFAULT: '#FFFFFF', dark: '#1D1D24' },
+        'surface-sunken': { DEFAULT: '#F4F4FB', dark: '#0B0B0F' },
+        'text-primary': { DEFAULT: '#0B0B0F', dark: '#F5F5F7' },
+        'text-secondary': { DEFAULT: '#6E6E8A', dark: '#9B9BAD' },
+        'text-muted': { DEFAULT: '#9B9BAD', dark: '#5A5A63' },
+        'text-on-accent': { DEFAULT: '#FFFFFF', dark: '#FFFFFF' },
+        accent: { DEFAULT: '#FF5D73', dark: '#FF8A9D' },
+        'accent-hover': { DEFAULT: '#E64563', dark: '#FF5D73' },
+        'accent-muted': { DEFAULT: '#FFC8D1', dark: 'rgba(255,138,157,0.18)' },
+        'accent-subtle': { DEFAULT: '#FFE9ED', dark: 'rgba(255,138,157,0.08)' },
+        border: { DEFAULT: '#EDEDF5', dark: '#26262E' },
+        'border-strong': { DEFAULT: '#DADAEA', dark: '#32323C' },
+        divider: { DEFAULT: '#F0F0F8', dark: '#1F1F26' },
+        success: { DEFAULT: '#4AC28A', dark: '#5DD69F' },
+        danger: { DEFAULT: '#E85D5D', dark: '#F07878' },
+        warning: { DEFAULT: '#F2B040', dark: '#F5C061' },
+        overlay: { DEFAULT: 'rgba(11,11,15,0.5)', dark: 'rgba(0,0,0,0.6)' },
+        // Tag palette
+        'tag-pink-bg': { DEFAULT: '#FFE4EC', dark: 'rgba(255,93,115,0.15)' },
+        'tag-pink-ink': { DEFAULT: '#C73E5A', dark: '#FFA3B2' },
+        'tag-blue-bg': { DEFAULT: '#E4F3FF', dark: 'rgba(134,168,231,0.15)' },
+        'tag-blue-ink': { DEFAULT: '#2D6FBF', dark: '#B6D0F0' },
+        'tag-green-bg': { DEFAULT: '#E8F6E4', dark: 'rgba(145,234,228,0.12)' },
+        'tag-green-ink': { DEFAULT: '#4A8E3A', dark: '#9ADDC8' },
+        'tag-purple-bg': { DEFAULT: '#EEE4FF', dark: 'rgba(127,127,213,0.18)' },
+        'tag-purple-ink': { DEFAULT: '#6B3FB8', dark: '#B9B9EA' },
+      },
+      borderRadius: {
+        sm: '8px',
+        md: '14px',
+        lg: '20px',
+        xl: '24px',
+        full: '9999px',
+      },
+      fontFamily: {
+        sans: ['DMSans_400Regular', 'system-ui'],
+        'sans-medium': ['DMSans_500Medium', 'system-ui'],
+        'sans-semibold': ['DMSans_600SemiBold', 'system-ui'],
+        'sans-bold': ['DMSans_700Bold', 'system-ui'],
+        'sans-extrabold': ['DMSans_800ExtraBold', 'system-ui'],
+      },
+      fontSize: {
+        display: ['28px', { lineHeight: '32px', letterSpacing: '-0.02em', fontWeight: '800' }],
+        title: ['18px', { lineHeight: '24px', letterSpacing: '-0.01em', fontWeight: '700' }],
+        body: ['14px', { lineHeight: '22px', letterSpacing: '0', fontWeight: '500' }],
+        caption: ['11px', { lineHeight: '14px', letterSpacing: '0.08em', fontWeight: '700' }],
+      },
+    },
+  },
+  plugins: [],
+};

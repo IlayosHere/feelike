@@ -1,0 +1,24 @@
+name: CI Guard
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  branch-name:
+    name: Check branch name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name pattern
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          PATTERN='^(phase-[0-9]+|feat|fix|docs|chore)/[a-z0-9-]+$'
+          if [[ ! "$BRANCH" =~ $PATTERN ]]; then
+            echo "ERROR: Branch name '$BRANCH' does not match the required pattern."
+            echo "Required pattern: $PATTERN"
+            echo "Examples: phase-2/app-scaffold, feat/capture-screen, fix/auth-token, docs/adr-007, chore/deps-update"
+            exit 1
+          fi
+          echo "Branch name '$BRANCH' is valid."
