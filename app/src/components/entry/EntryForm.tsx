@@ -1,23 +1,26 @@
 import React from 'react';
 import {
+  Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MoodChip } from '@/components/ui/MoodChip';
-import { Button } from '@/components/ui/Button';
 import { EntryTagEditor } from '@/components/entry/EntryTagEditor';
+import { useTheme } from '@/theme/useTheme';
 import type { MoodValue } from '@/types/api';
 
 type MoodDefinition = { value: MoodValue; emoji: string; label: string };
 
 export const MOODS: MoodDefinition[] = [
-  { value: 'happy', emoji: '😊', label: 'Happy' },
+  { value: 'happy',   emoji: '😊', label: 'Happy' },
   { value: 'excited', emoji: '🔥', label: 'Excited' },
-  { value: 'sad', emoji: '😔', label: 'Sad' },
+  { value: 'sad',     emoji: '😔', label: 'Sad' },
   { value: 'anxious', emoji: '😰', label: 'Anxious' },
-  { value: 'angry', emoji: '😤', label: 'Angry' },
-  { value: 'calm', emoji: '🧘', label: 'Calm' },
+  { value: 'angry',   emoji: '😤', label: 'Angry' },
+  { value: 'calm',    emoji: '🧘', label: 'Calm' },
 ];
 
 export type EntryFormProps = {
@@ -47,19 +50,39 @@ export function EntryForm({
   onRemoveTag,
   onSave,
 }: EntryFormProps) {
+  const { theme } = useTheme();
+
   return (
     <>
+      {/* Content input — same card treatment as CaptureScreen */}
       <TextInput
         value={content}
         onChangeText={onContentChange}
         multiline
         textAlignVertical="top"
-        className="bg-surface-sunken rounded-xl p-4 min-h-[120px] text-text-primary text-body mb-6"
+        style={{
+          backgroundColor: theme.surface,
+          borderRadius: 24,
+          borderWidth: 2,
+          borderColor: theme.border,
+          padding: 22,
+          minHeight: 160,
+          color: theme.textPrimary,
+          fontSize: 17,
+          lineHeight: 26,
+          fontWeight: '500',
+          marginBottom: 8,
+        }}
         accessibilityLabel="Entry content"
       />
 
-      <SectionLabel label="Mood" />
-      <View className="flex-row flex-wrap gap-3 mb-6">
+      {/* Mood chips — horizontal scroll, no wrapping, no label */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingVertical: 16, gap: 10 }}
+        keyboardShouldPersistTaps="handled"
+      >
         {MOODS.map((m) => (
           <MoodChip
             key={m.value}
@@ -69,9 +92,9 @@ export function EntryForm({
             onPress={() => onMoodPress(m.value)}
           />
         ))}
-      </View>
+      </ScrollView>
 
-      <SectionLabel label="Tags" />
+      {/* Tags — no label */}
       <EntryTagEditor
         tags={tags}
         onAdd={onAddTag}
@@ -79,27 +102,54 @@ export function EntryForm({
       />
 
       {saveError !== null ? (
-        <Text className="text-danger text-caption mt-3">{saveError}</Text>
+        <Text style={{ color: theme.danger, fontSize: 13, marginTop: 12 }}>
+          {saveError}
+        </Text>
       ) : null}
 
-      {hasChanges ? (
-        <View className="mt-6">
-          <Button
-            label="Save changes"
-            onPress={onSave}
-            loading={isSaving}
-            disabled={!hasChanges}
-          />
-        </View>
-      ) : null}
+      {/* Save button — always visible, muted when no changes */}
+      <View style={{ marginTop: 24 }}>
+        <SaveButton
+          hasChanges={hasChanges}
+          isSaving={isSaving}
+          onSave={onSave}
+        />
+      </View>
     </>
   );
 }
 
-function SectionLabel({ label }: { label: string }) {
+function SaveButton({
+  hasChanges,
+  isSaving,
+  onSave,
+}: {
+  hasChanges: boolean;
+  isSaving: boolean;
+  onSave: () => void;
+}) {
+  const { theme } = useTheme();
+  const inactive = !hasChanges && !isSaving;
+
   return (
-    <Text className="text-text-secondary text-caption uppercase tracking-widest mb-2">
-      {label}
-    </Text>
+    <Pressable
+      onPress={onSave}
+      disabled={inactive}
+      accessibilityRole="button"
+      accessibilityLabel="Save changes"
+      accessibilityState={{ disabled: inactive }}
+      style={{ borderRadius: 20, overflow: 'hidden', opacity: inactive ? 0.38 : 1 }}
+    >
+      <LinearGradient
+        colors={[theme.gradPrimaryStart, theme.gradPrimaryEnd]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{ paddingVertical: 16, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '700' }}>
+          {isSaving ? 'Saving…' : 'Save changes'}
+        </Text>
+      </LinearGradient>
+    </Pressable>
   );
 }

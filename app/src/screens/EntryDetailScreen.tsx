@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -14,6 +14,8 @@ import { EntryForm } from '@/components/entry/EntryForm';
 import { useEntry } from '@/hooks/useEntry';
 import { usePatchEntry } from '@/hooks/usePatchEntry';
 import { useDeleteEntry } from '@/hooks/useDeleteEntry';
+import { useSidePanel } from '@/context/SidePanelContext';
+import { useTheme } from '@/theme/useTheme';
 import type { Entry } from '@/types/api';
 import type { MoodValue } from '@/types/api';
 
@@ -40,21 +42,19 @@ function formatDateTime(isoString: string): string {
 // ---------------------------------------------------------------------------
 
 function DetailSkeleton() {
+  const { theme } = useTheme();
   return (
-    <View className="flex-1 px-4 pt-4">
-      <View className="h-3 bg-surface-sunken rounded mb-4 w-1/2" />
-      <View className="bg-surface-sunken rounded-xl p-4 min-h-[120px] mb-6">
-        <View className="h-4 bg-surface rounded mb-2 w-full" />
-        <View className="h-4 bg-surface rounded mb-2 w-4/5" />
-        <View className="h-4 bg-surface rounded w-3/5" />
+    <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 16 }}>
+      <View style={{ height: 12, backgroundColor: theme.surfaceSunken, borderRadius: 6, marginBottom: 16, width: '50%' }} />
+      <View style={{ backgroundColor: theme.surfaceSunken, borderRadius: 12, padding: 16, minHeight: 120, marginBottom: 24 }}>
+        <View style={{ height: 16, backgroundColor: theme.surface, borderRadius: 4, marginBottom: 8 }} />
+        <View style={{ height: 16, backgroundColor: theme.surface, borderRadius: 4, marginBottom: 8, width: '80%' }} />
+        <View style={{ height: 16, backgroundColor: theme.surface, borderRadius: 4, width: '60%' }} />
       </View>
-      <View className="h-3 bg-surface-sunken rounded mb-3 w-16" />
-      <View className="flex-row gap-3">
+      <View style={{ height: 12, backgroundColor: theme.surfaceSunken, borderRadius: 6, marginBottom: 12, width: 64 }} />
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         {[1, 2, 3, 4, 5, 6].map((n) => (
-          <View
-            key={n}
-            className="w-[52px] h-[52px] bg-surface-sunken rounded-lg"
-          />
+          <View key={n} style={{ width: 52, height: 52, backgroundColor: theme.surfaceSunken, borderRadius: 8 }} />
         ))}
       </View>
     </View>
@@ -142,6 +142,8 @@ export function EntryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: entry, isLoading, isError } = useEntry(id ?? '');
   const deleteEntry = useDeleteEntry();
+  const { theme } = useTheme();
+  const { setDeleteAction } = useSidePanel();
 
   const handleDeletePress = useCallback(() => {
     if (!entry) return;
@@ -160,13 +162,15 @@ export function EntryDetailScreen() {
     ]);
   }, [entry, deleteEntry, router]);
 
+  // Register delete action in sidebar; clear when leaving this screen
+  useEffect(() => {
+    setDeleteAction(handleDeletePress);
+    return () => setDeleteAction(null);
+  }, [handleDeletePress, setDeleteAction]);
+
   return (
-    <SafeAreaView className="flex-1 bg-bg">
-      <DetailHeader
-        onBack={() => router.back()}
-        onDelete={handleDeletePress}
-        isDeleting={deleteEntry.isPending}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg, ...(Platform.OS === 'web' ? { height: '100%' as any } : {}) }}>
+      <DetailHeader onBack={() => router.back()} />
 
       {isLoading ? (
         <DetailSkeleton />
@@ -174,13 +178,13 @@ export function EntryDetailScreen() {
         <EntryNotFound onBack={() => router.back()} />
       ) : (
         <KeyboardAvoidingView
-          className="flex-1"
+          style={{ flex: 1, backgroundColor: theme.bg }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <ScrollView
-            className="flex-1 px-4"
+            style={{ flex: 1, backgroundColor: theme.bg }}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingBottom: 32 }}
           >
             <EntryBody entry={entry} />
           </ScrollView>
@@ -194,34 +198,28 @@ export function EntryDetailScreen() {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-type DetailHeaderProps = {
-  onBack: () => void;
-  onDelete: () => void;
-  isDeleting: boolean;
-};
-
-function DetailHeader({ onBack, onDelete, isDeleting }: DetailHeaderProps) {
+function DetailHeader({ onBack }: { onBack: () => void }) {
+  const { open: openPanel } = useSidePanel();
+  const { theme } = useTheme();
   return (
-    <View className="flex-row items-center justify-between px-4 pt-2 pb-3">
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
       <Pressable
         onPress={onBack}
         accessibilityRole="button"
         accessibilityLabel="Go back"
-        className="p-2"
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        style={{ padding: 8 }}
       >
-        <Text className="text-text-secondary text-xl">{'←'}</Text>
+        <Text style={{ fontSize: 20, color: theme.textSecondary }}>{'←'}</Text>
       </Pressable>
-
       <Pressable
-        onPress={onDelete}
-        disabled={isDeleting}
+        onPress={openPanel}
         accessibilityRole="button"
-        accessibilityLabel="Delete entry"
-        className={`p-2 ${isDeleting ? 'opacity-40' : ''}`}
+        accessibilityLabel="Open menu"
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        style={{ padding: 8 }}
       >
-        <Text className="text-danger text-body">Delete</Text>
+        <Text style={{ fontSize: 20, color: theme.textSecondary }}>{'≡'}</Text>
       </Pressable>
     </View>
   );

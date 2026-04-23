@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme/useTheme';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAuthStore } from '@/stores/authStore';
+import { useSidePanel } from '@/context/SidePanelContext';
 import type { ThemeMode } from '@/theme/types';
 
 // ---------------------------------------------------------------------------
@@ -203,20 +204,32 @@ export function SettingsScreen() {
 // ---------------------------------------------------------------------------
 
 function SettingsHeader({ onBack }: { onBack: () => void }) {
+  const { open: openPanel } = useSidePanel();
   return (
-    <View className="flex-row items-center px-4 pt-2 pb-3">
+    <View className="flex-row items-center justify-between px-4 pt-2 pb-3">
+      <View className="flex-row items-center">
+        <Pressable
+          onPress={onBack}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          className="p-2 mr-2"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Text className="text-text-secondary text-xl">{'←'}</Text>
+        </Pressable>
+        <Text className="text-title text-text-primary font-sans-bold">
+          Settings
+        </Text>
+      </View>
       <Pressable
-        onPress={onBack}
+        onPress={openPanel}
         accessibilityRole="button"
-        accessibilityLabel="Go back"
-        className="p-2 mr-2"
+        accessibilityLabel="Open menu"
+        className="p-2"
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Text className="text-text-secondary text-xl">{'←'}</Text>
+        <Text className="text-text-secondary text-xl">{'≡'}</Text>
       </Pressable>
-      <Text className="text-title text-text-primary font-sans-bold">
-        Settings
-      </Text>
     </View>
   );
 }

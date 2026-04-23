@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
+import { useColorScheme as useNativeWindColorScheme } from 'nativewind';
 import { ThemeContext } from './ThemeContext';
 import { darkTheme, lightTheme } from './tokens';
 import type { ThemeMode } from './types';
@@ -27,6 +28,7 @@ const TRANSITION_EASING = Easing.bezier(0.2, 0, 0, 1);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
+  const { setColorScheme } = useNativeWindColorScheme();
   const [mode, setModeState] = useState<ThemeMode>('auto');
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -40,6 +42,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Shared value: 0 = light, 1 = dark
   const darkProgress = useSharedValue(resolvedMode === 'dark' ? 1 : 0);
+
+  // Sync resolved mode into NativeWind so dark: classes activate correctly.
+  useEffect(() => {
+    setColorScheme(resolvedMode);
+  }, [resolvedMode, setColorScheme]);
 
   // Animate whenever resolvedMode changes.
   useEffect(() => {
@@ -99,7 +106,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <ThemeContext.Provider value={{ mode, setMode, resolvedMode, theme }}>
       <Animated.View
-        className={`flex-1 bg-bg${resolvedMode === 'dark' ? ' dark' : ''}`}
+        className="flex-1 bg-bg"
         style={[animatedStyle, { ...(Platform.OS === 'web' ? { height: '100vh' } : {}) }]}
       >
         {children}

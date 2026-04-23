@@ -17,6 +17,7 @@ import { DayGroupHeader } from '@/components/timeline/DayGroupHeader';
 import { useEntries } from '@/hooks/useEntries';
 import { useTheme } from '@/theme/useTheme';
 import { GradientText } from '@/components/ui/GradientText';
+import { useSidePanel } from '@/context/SidePanelContext';
 import type { Entry } from '@/types/api';
 
 // ---------------------------------------------------------------------------
@@ -184,19 +185,31 @@ function TimelineHeader({
   onNewEntry: () => void;
 }) {
   const { theme } = useTheme();
+  const { open: openPanel } = useSidePanel();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 20, paddingBottom: 8 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-        <Text style={{ fontSize: 28, fontWeight: '800', letterSpacing: -0.5, color: theme.textPrimary }}>
-          {'Your '}
-        </Text>
-        <GradientText
-          from={theme.gradBrandStart}
-          to={theme.gradBrandEnd}
-          style={{ fontSize: 28, fontWeight: '800', letterSpacing: -0.5 }}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Pressable
+          onPress={openPanel}
+          accessibilityRole="button"
+          accessibilityLabel="Open menu"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: theme.surfaceSunken, alignItems: 'center', justifyContent: 'center' }}
         >
-          journey
-        </GradientText>
+          <Text style={{ fontSize: 18, color: theme.textPrimary }}>{'≡'}</Text>
+        </Pressable>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+          <Text style={{ fontSize: 28, fontWeight: '800', letterSpacing: -0.5, color: theme.textPrimary }}>
+            {'Your '}
+          </Text>
+          <GradientText
+            from={theme.gradBrandStart}
+            to={theme.gradBrandEnd}
+            style={{ fontSize: 28, fontWeight: '800', letterSpacing: -0.5 }}
+          >
+            journey
+          </GradientText>
+        </View>
       </View>
       <Pressable
         onPress={onNewEntry}

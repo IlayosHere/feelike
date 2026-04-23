@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import { Toast } from '@/components/ui/Toast';
 import { MoodRow } from '@/components/capture/MoodRow';
 import { TagSection } from '@/components/capture/TagSection';
@@ -16,6 +15,7 @@ import { useCaptureStore } from '@/stores/captureStore';
 import { useCreateEntry } from '@/hooks/useCreateEntry';
 import { useTheme } from '@/theme/useTheme';
 import { GradientText } from '@/components/ui/GradientText';
+import { useSidePanel } from '@/context/SidePanelContext';
 
 const PROMPTS = ["What's on your mind?", 'How are you feeling?', 'Got an idea?'];
 
@@ -28,10 +28,10 @@ const HIDDEN_TOAST: ToastState = { visible: false, message: '', type: 'error' };
 const SUCCESS_FLASH_MS = 400;
 
 export function CaptureScreen() {
-  const router = useRouter();
   const { content, mood, tags, setContent, reset } = useCaptureStore();
   const createEntry = useCreateEntry();
   const { theme } = useTheme();
+  const { open: openPanel } = useSidePanel();
 
   const [toast, setToast] = useState<ToastState>(HIDDEN_TOAST);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -60,7 +60,16 @@ export function CaptureScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg, ...(Platform.OS === 'web' ? { height: '100%' as any } : {}) }}>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8, gap: 12 }}>
+        <Pressable
+          onPress={openPanel}
+          accessibilityRole="button"
+          accessibilityLabel="Open menu"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={{ width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.surfaceSunken }}
+        >
+          <Text style={{ fontSize: 18, color: theme.textPrimary }}>{'≡'}</Text>
+        </Pressable>
         <GradientText
           from={theme.gradBrandStart}
           to={theme.gradBrandEnd}
@@ -68,26 +77,6 @@ export function CaptureScreen() {
         >
           feelike
         </GradientText>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Pressable
-            onPress={() => router.push('/timeline')}
-            accessibilityRole="button"
-            accessibilityLabel="Open timeline"
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={{ width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Text style={{ fontSize: 18, color: theme.textPrimary }}>{'☰'}</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => router.push('/settings')}
-            accessibilityRole="button"
-            accessibilityLabel="Open settings"
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={{ width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Text style={{ fontSize: 18, color: theme.textPrimary }}>{'⚙'}</Text>
-          </Pressable>
-        </View>
       </View>
 
       {/* Textarea — flex:1 fills all space between header and bottom bar */}
@@ -107,7 +96,7 @@ export function CaptureScreen() {
           backgroundColor: theme.surface,
           borderRadius: 24,
           borderWidth: 2,
-          borderColor: theme.borderStrong,
+          borderColor: theme.border,
           fontSize: 17,
           lineHeight: 26,
           color: theme.textPrimary,

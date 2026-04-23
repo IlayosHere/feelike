@@ -66,8 +66,7 @@ export function MoodChip({ emoji, label, selected, onPress }: MoodChipProps) {
       accessibilityState={{ selected }}
     >
       <Animated.View
-        style={[{ width: 52, height: 52 }, animatedStyle, shadowStyle]}
-        className="rounded-lg overflow-hidden"
+        style={[{ width: 52, height: 52, borderRadius: 14, overflow: 'hidden' }, animatedStyle, shadowStyle]}
       >
         {selected ? (
           <LinearGradient
@@ -81,7 +80,7 @@ export function MoodChip({ emoji, label, selected, onPress }: MoodChipProps) {
             <CheckmarkDot />
           </LinearGradient>
         ) : (
-          <View className="flex-1 items-center justify-center bg-surface-sunken">
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.surfaceSunken }}>
             <ChipContent emoji={emoji} />
           </View>
         )}
@@ -99,18 +98,20 @@ function ChipContent({ emoji }: { emoji: string }) {
 }
 
 function InsetRing() {
+  const { theme } = useTheme();
   return (
     <View
-      className="absolute inset-0 rounded-lg border-2 border-surface"
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 14, borderWidth: 2, borderColor: theme.surface }}
       pointerEvents="none"
     />
   );
 }
 
 function CheckmarkDot() {
+  const { theme } = useTheme();
   return (
     <View
-      className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-accent-hover border-2 border-surface"
+      style={{ position: 'absolute', bottom: 4, right: 4, width: 8, height: 8, borderRadius: 9999, backgroundColor: theme.accentHover, borderWidth: 2, borderColor: theme.surface }}
       pointerEvents="none"
     />
   );

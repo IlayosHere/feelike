@@ -10,6 +10,8 @@ import {
 } from '@expo-google-fonts/dm-sans';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/theme/ThemeProvider';
+import { SidePanelProvider } from '@/context/SidePanelContext';
+import { SidePanel } from '@/components/SidePanel';
 import { useAuthStore } from '@/stores/authStore';
 import { startMockServer } from '@/mocks/setup';
 
@@ -57,7 +59,10 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Slot />
+        <SidePanelProvider>
+          <Slot />
+          <SidePanel />
+        </SidePanelProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
