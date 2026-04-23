@@ -18,49 +18,7 @@ import { useEntries } from '@/hooks/useEntries';
 import { useTheme } from '@/theme/useTheme';
 import { GradientText } from '@/components/ui/GradientText';
 import { useSidePanel } from '@/context/SidePanelContext';
-import type { Entry } from '@/types/api';
-
-// ---------------------------------------------------------------------------
-// Date grouping helpers
-// ---------------------------------------------------------------------------
-
-function toDateKey(isoString: string): string {
-  return new Date(isoString).toDateString();
-}
-
-function getDayLabel(dateKey: string): string {
-  const today = new Date().toDateString();
-  const yesterday = new Date(Date.now() - 86_400_000).toDateString();
-
-  if (dateKey === today) return 'Today';
-  if (dateKey === yesterday) return 'Yesterday';
-
-  return new Date(dateKey).toLocaleDateString([], {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-type HeaderItem = { type: 'header'; key: string; label: string };
-type EntryItem  = { type: 'entry';  key: string; entry: Entry };
-type ListItem   = HeaderItem | EntryItem;
-
-function buildListItems(entries: Entry[]): ListItem[] {
-  const items: ListItem[] = [];
-  let lastDateKey: string | null = null;
-
-  for (const entry of entries) {
-    const dateKey = toDateKey(entry.created_at);
-    if (dateKey !== lastDateKey) {
-      lastDateKey = dateKey;
-      items.push({ type: 'header', key: `header-${dateKey}`, label: getDayLabel(dateKey) });
-    }
-    items.push({ type: 'entry', key: entry.id, entry });
-  }
-
-  return items;
-}
+import { buildListItems, type ListItem } from '@/utils/dateGrouping';
 
 // ---------------------------------------------------------------------------
 // Skeleton
@@ -136,8 +94,10 @@ export function TimelineScreen() {
     <ActivityIndicator className="my-4" accessibilityLabel="Loading more entries" />
   ) : null;
 
+  const webFullHeight = Platform.OS === 'web' ? { height: '100%' as const } : undefined;
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg, ...(Platform.OS === 'web' ? { height: '100%' as any } : {}) }}>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: theme.bg }, webFullHeight]}>
       <TimelineHeader onBack={() => router.back()} onNewEntry={() => router.back()} />
 
       {isLoading ? (

@@ -1,33 +1,21 @@
 import React, { useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import { useTags } from '@/hooks/useTags';
 import { useCaptureStore } from '@/stores/captureStore';
 import { useTheme } from '@/theme/useTheme';
-
-const AUTOSUGGEST_MIN_LENGTH = 1;
-const MAX_SUGGESTIONS = 4;
+import { useTagAutocomplete } from '@/hooks/useTagAutocomplete';
 
 export function TagSection() {
   const { tagInput, tags, setTagInput, addTag, removeTag } = useCaptureStore();
-  const { data: allTags } = useTags();
   const { theme } = useTheme();
   const inputRef = useRef<TextInput>(null);
   const [inputVisible, setInputVisible] = useState(false);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
 
-  const suggestions =
-    tagInput.length >= AUTOSUGGEST_MIN_LENGTH && allTags
-      ? allTags
-          .map((t) => t.name)
-          .filter((name) => name.toLowerCase().includes(tagInput.toLowerCase()) && !tags.includes(name))
-          .slice(0, MAX_SUGGESTIONS)
-      : [];
+  const { suggestions, showDropdown } = useTagAutocomplete(tagInput, tags);
 
   const handleSubmit = () => {
     if (tagInput.trim()) {
       addTag(tagInput.trim());
       setTagInput('');
-      setDropdownVisible(false);
     }
     setInputVisible(false);
   };
@@ -35,13 +23,11 @@ export function TagSection() {
   const handleSuggestionPress = (name: string) => {
     addTag(name);
     setTagInput('');
-    setDropdownVisible(false);
     setInputVisible(false);
   };
 
   const handleChangeText = (text: string) => {
     setTagInput(text);
-    setDropdownVisible(text.length >= AUTOSUGGEST_MIN_LENGTH);
   };
 
   return (
@@ -95,7 +81,7 @@ export function TagSection() {
               }}
               accessibilityLabel="Tag name input"
             />
-            {dropdownVisible && suggestions.length > 0 ? (
+            {showDropdown ? (
               <View style={{
                 position: 'absolute',
                 top: 34,

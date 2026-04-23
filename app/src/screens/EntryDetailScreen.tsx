@@ -16,6 +16,7 @@ import { usePatchEntry } from '@/hooks/usePatchEntry';
 import { useDeleteEntry } from '@/hooks/useDeleteEntry';
 import { useSidePanel } from '@/context/SidePanelContext';
 import { useTheme } from '@/theme/useTheme';
+import { extractErrorMessage } from '@/utils/errorUtils';
 import type { Entry } from '@/types/api';
 import type { MoodValue } from '@/types/api';
 
@@ -90,9 +91,7 @@ function EntryBody({ entry }: EntryBodyProps) {
       { id: entry.id, content, mood, tags },
       {
         onError: (err) => {
-          setSaveError(
-            err instanceof Error ? err.message : 'Could not save. Try again.',
-          );
+          setSaveError(extractErrorMessage(err, 'Could not save. Try again.'));
         },
       },
     );
@@ -168,8 +167,10 @@ export function EntryDetailScreen() {
     return () => setDeleteAction(null);
   }, [handleDeletePress, setDeleteAction]);
 
+  const webFullHeight = Platform.OS === 'web' ? { height: '100%' as const } : undefined;
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg, ...(Platform.OS === 'web' ? { height: '100%' as any } : {}) }}>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: theme.bg }, webFullHeight]}>
       <DetailHeader onBack={() => router.back()} />
 
       {isLoading ? (

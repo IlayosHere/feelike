@@ -2,18 +2,7 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 import { MoodChip } from '@/components/ui/MoodChip';
 import { useCaptureStore } from '@/stores/captureStore';
-import type { MoodValue } from '@/types/api';
-
-type MoodDefinition = { value: MoodValue; emoji: string; label: string };
-
-const MOODS: MoodDefinition[] = [
-  { value: 'sad',     emoji: '😔', label: 'Sad' },
-  { value: 'anxious', emoji: '😰', label: 'Anxious' },
-  { value: 'angry',   emoji: '😤', label: 'Angry' },
-  { value: 'calm',    emoji: '🧘', label: 'Calm' },
-  { value: 'happy',   emoji: '😊', label: 'Happy' },
-  { value: 'excited', emoji: '🔥', label: 'Excited' },
-];
+import { MOODS } from '@/types/api';
 
 export function MoodRow() {
   const { mood, setMood } = useCaptureStore();

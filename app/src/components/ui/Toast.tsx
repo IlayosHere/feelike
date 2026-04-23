@@ -1,5 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Text } from 'react-native';
+import React, { useEffect } from 'react';
+import { Text } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 export type ToastType = 'error' | 'success';
 
@@ -14,38 +19,23 @@ const SLIDE_OUT_DURATION = 180;
 const HIDDEN_TRANSLATE = 80;
 
 export function Toast({ message, type, visible }: ToastProps) {
-  const translateY = useRef(new Animated.Value(HIDDEN_TRANSLATE)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useSharedValue(HIDDEN_TRANSLATE);
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
-      Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: SLIDE_IN_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: SLIDE_IN_DURATION,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      translateY.value = withTiming(0, { duration: SLIDE_IN_DURATION });
+      opacity.value = withTiming(1, { duration: SLIDE_IN_DURATION });
     } else {
-      Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: HIDDEN_TRANSLATE,
-          duration: SLIDE_OUT_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 0,
-          duration: SLIDE_OUT_DURATION,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      translateY.value = withTiming(HIDDEN_TRANSLATE, { duration: SLIDE_OUT_DURATION });
+      opacity.value = withTiming(0, { duration: SLIDE_OUT_DURATION });
     }
-  }, [visible, translateY, opacity]);
+  }, [visible]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+    opacity: opacity.value,
+  }));
 
   const bgClass =
     type === 'error'
@@ -54,7 +44,7 @@ export function Toast({ message, type, visible }: ToastProps) {
 
   return (
     <Animated.View
-      style={{ transform: [{ translateY }], opacity }}
+      style={animStyle}
       className={`mx-4 mb-3 px-4 py-3 rounded-lg ${bgClass}`}
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"

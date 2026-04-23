@@ -10,18 +10,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MoodChip } from '@/components/ui/MoodChip';
 import { EntryTagEditor } from '@/components/entry/EntryTagEditor';
 import { useTheme } from '@/theme/useTheme';
+import { MOODS } from '@/types/api';
 import type { MoodValue } from '@/types/api';
-
-type MoodDefinition = { value: MoodValue; emoji: string; label: string };
-
-export const MOODS: MoodDefinition[] = [
-  { value: 'happy',   emoji: '😊', label: 'Happy' },
-  { value: 'excited', emoji: '🔥', label: 'Excited' },
-  { value: 'sad',     emoji: '😔', label: 'Sad' },
-  { value: 'anxious', emoji: '😰', label: 'Anxious' },
-  { value: 'angry',   emoji: '😤', label: 'Angry' },
-  { value: 'calm',    emoji: '🧘', label: 'Calm' },
-];
 
 export type EntryFormProps = {
   content: string;
@@ -146,7 +136,7 @@ function SaveButton({
         end={{ x: 1, y: 0 }}
         style={{ paddingVertical: 16, alignItems: 'center', justifyContent: 'center' }}
       >
-        <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '700' }}>
+        <Text style={{ color: theme.textOnAccent, fontSize: 16, fontWeight: '700' }}>
           {isSaving ? 'Saving…' : 'Save changes'}
         </Text>
       </LinearGradient>

@@ -11,20 +11,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLogin } from '@/hooks/useLogin';
 import { useSignup } from '@/hooks/useSignup';
+import { extractErrorMessage } from '@/utils/errorUtils';
 import { SignInForm, SignUpForm } from './AuthForms';
+import { useTheme } from '@/theme/useTheme';
 
 type Tab = 'signin' | 'signup';
-
-function extractErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return 'Something went wrong. Please try again.';
-}
 
 export function AuthScreen() {
   const [activeTab, setActiveTab] = useState<Tab>('signin');
   const [showSignInSuccess, setShowSignInSuccess] = useState(false);
   const [showSignUpSuccess, setShowSignUpSuccess] = useState(false);
 
+  const { theme } = useTheme();
   const login = useLogin();
   const signup = useSignup();
 
@@ -78,7 +76,7 @@ export function AuthScreen() {
           <View className="items-center justify-center px-4 py-10">
             <View className="items-center mb-4">
               <View className="w-20 h-20 rounded-2xl bg-accent items-center justify-center mb-4 shadow-md"
-                style={{ shadowColor: '#FF5D73', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8 }}
+                style={{ shadowColor: theme.gradPrimaryStart, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8 }}
               >
                 <Text style={{ fontSize: 38, lineHeight: 44 }}>{'🫀'}</Text>
               </View>

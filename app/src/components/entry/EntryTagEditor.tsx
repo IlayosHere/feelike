@@ -1,10 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { TagChip } from '@/components/ui/TagChip';
-import { useTags } from '@/hooks/useTags';
-
-const AUTOSUGGEST_MIN_LENGTH = 1;
-const MAX_SUGGESTIONS = 4;
+import { useTagAutocomplete } from '@/hooks/useTagAutocomplete';
+import { useTheme } from '@/theme/useTheme';
 
 export type EntryTagEditorProps = {
   tags: string[];
@@ -13,42 +11,28 @@ export type EntryTagEditorProps = {
 };
 
 export function EntryTagEditor({ tags, onAdd, onRemove }: EntryTagEditorProps) {
-  const { data: allTags } = useTags();
+  const { theme } = useTheme();
   const [input, setInput] = useState('');
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
-  const suggestions =
-    input.length >= AUTOSUGGEST_MIN_LENGTH && allTags
-      ? allTags
-          .map((t) => t.name)
-          .filter(
-            (name) =>
-              name.toLowerCase().includes(input.toLowerCase()) &&
-              !tags.includes(name),
-          )
-          .slice(0, MAX_SUGGESTIONS)
-      : [];
+  const { suggestions, showDropdown } = useTagAutocomplete(input, tags);
 
   const handleSubmit = () => {
     const trimmed = input.trim();
     if (trimmed) {
       onAdd(trimmed);
       setInput('');
-      setDropdownVisible(false);
     }
   };
 
   const handleSuggestion = (name: string) => {
     onAdd(name);
     setInput('');
-    setDropdownVisible(false);
     inputRef.current?.focus();
   };
 
   const handleChangeText = (text: string) => {
     setInput(text);
-    setDropdownVisible(text.length >= AUTOSUGGEST_MIN_LENGTH);
   };
 
   return (
@@ -73,14 +57,14 @@ export function EntryTagEditor({ tags, onAdd, onRemove }: EntryTagEditorProps) {
           onChangeText={handleChangeText}
           onSubmitEditing={handleSubmit}
           placeholder="Add tag..."
-          placeholderTextColor="#9B9BAD"
+          placeholderTextColor={theme.textSecondary}
           returnKeyType="done"
           blurOnSubmit={false}
           className="h-10 text-text-primary text-body"
           accessibilityLabel="Add tag"
         />
 
-        {dropdownVisible && suggestions.length > 0 ? (
+        {showDropdown ? (
           <View className="absolute top-10 left-0 right-0 bg-surface rounded-md border border-border z-10">
             {suggestions.map((name) => (
               <Pressable

@@ -16,6 +16,7 @@ import { useCreateEntry } from '@/hooks/useCreateEntry';
 import { useTheme } from '@/theme/useTheme';
 import { GradientText } from '@/components/ui/GradientText';
 import { useSidePanel } from '@/context/SidePanelContext';
+import { extractErrorMessage } from '@/utils/errorUtils';
 
 const PROMPTS = ["What's on your mind?", 'How are you feeling?', 'Got an idea?'];
 
@@ -50,15 +51,16 @@ export function CaptureScreen() {
           setTimeout(() => { setSaveSuccess(false); reset(); }, SUCCESS_FLASH_MS);
         },
         onError: (err) => {
-          const message = err instanceof Error ? err.message : 'Could not save. Try again.';
-          setToast({ visible: true, message, type: 'error' });
+          setToast({ visible: true, message: extractErrorMessage(err, 'Could not save. Try again.'), type: 'error' });
         },
       },
     );
   }, [canSave, content, mood, tags, createEntry, reset]);
 
+  const webFullHeight = Platform.OS === 'web' ? { height: '100%' as const } : undefined;
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg, ...(Platform.OS === 'web' ? { height: '100%' as any } : {}) }}>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: theme.bg }, webFullHeight]}>
       {/* Header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8, gap: 12 }}>
         <Pressable

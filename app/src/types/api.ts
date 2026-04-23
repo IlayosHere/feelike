@@ -1,5 +1,15 @@
 export type MoodValue = 'happy' | 'excited' | 'sad' | 'anxious' | 'angry' | 'calm';
 
+export type MoodDefinition = { value: MoodValue; emoji: string; label: string };
+export const MOODS: MoodDefinition[] = [
+  { value: 'happy',   emoji: '😊', label: 'Happy' },
+  { value: 'excited', emoji: '🔥', label: 'Excited' },
+  { value: 'sad',     emoji: '😔', label: 'Sad' },
+  { value: 'anxious', emoji: '😰', label: 'Anxious' },
+  { value: 'angry',   emoji: '😤', label: 'Angry' },
+  { value: 'calm',    emoji: '🧘', label: 'Calm' },
+];
+
 export type Entry = {
   id: string;
   content: string;

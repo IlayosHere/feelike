@@ -132,10 +132,11 @@ export function SidePanel() {
     opacity: backdropOpacity.value,
   }));
 
-  const handleNav = (route: string) => {
+  type NavRoute = typeof NAV_ITEMS[number]['route'];
+  const handleNav = (route: NavRoute) => {
     close();
     // Small delay lets the panel close animation start before nav
-    setTimeout(() => router.push(route as any), 60);
+    setTimeout(() => router.push(route), 60);
   };
 
   const handleSignOut = () => {
