@@ -1,33 +1,75 @@
-# Dependencies
-node_modules/
+# -----------------------------------------------------------------------------
+# Secrets & env
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
 
-# Expo
+# -----------------------------------------------------------------------------
+# Node / Expo / React Native
+# -----------------------------------------------------------------------------
+node_modules/
 .expo/
+.expo-shared/
 dist/
 web-build/
-
-# Native build outputs
-ios/
-android/
-
-# Environment
-.env
-.env.local
-.env.*.local
-
-# Logs
-*.log
+*.tsbuildinfo
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# OS
+# EAS
+.easconfig
+credentials.json
+
+# iOS / Android native build artifacts (if we ever prebuild)
+ios/
+android/
+*.xcworkspace
+*.xcodeproj/xcuserdata/
+
+# -----------------------------------------------------------------------------
+# Python / FastAPI
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.sqlite
+*.sqlite3
+*.db
+.venv/
+venv/
+
+# -----------------------------------------------------------------------------
+# Editors / OS
+# -----------------------------------------------------------------------------
+.vscode/
+!.vscode/settings.json.example
+.idea/
 .DS_Store
 Thumbs.db
 
-# Editor
-.vscode/
-.idea/
+# -----------------------------------------------------------------------------
+# Terraform
+# -----------------------------------------------------------------------------
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*.tfvars
+*.tfvars.json
 
-# Lock files (keep package-lock.json, ignore yarn.lock if not used)
-yarn.lock
+# -----------------------------------------------------------------------------
+# Claude / local tooling
+# -----------------------------------------------------------------------------
+.claude/settings.local.json
