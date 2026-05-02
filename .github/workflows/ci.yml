@@ -10,8 +10,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Always-runs guard so the CI status reflects reality even when app/ or backend/
-  # don't exist yet. When real code lands, this job still runs alongside the others.
   ci-guard:
     name: CI guard (docs & workflow sanity)
     runs-on: ubuntu-24.04
@@ -28,7 +26,6 @@ jobs:
   lint-backend:
     name: Backend lint & type-check
     runs-on: ubuntu-24.04
-    if: ${{ hashFiles('backend/requirements.txt') != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +52,6 @@ jobs:
   test-backend:
     name: Backend tests
     runs-on: ubuntu-24.04
-    if: ${{ hashFiles('backend/requirements.txt') != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -81,7 +77,6 @@ jobs:
   lint-app:
     name: Mobile lint & type-check
     runs-on: ubuntu-24.04
-    if: ${{ hashFiles('app/package.json') != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -107,7 +102,6 @@ jobs:
   test-app:
     name: Mobile tests
     runs-on: ubuntu-24.04
-    if: ${{ hashFiles('app/package.json') != '' }}
     steps:
       - uses: actions/checkout@v4
 
