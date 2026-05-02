@@ -37,7 +37,7 @@ _origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
 app = FastAPI(title="feelike API", version="0.1.0")
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 app.add_middleware(
     CORSMiddleware,

@@ -127,7 +127,7 @@ def list_entries(
     if len(rows) > limit:
         rows = rows[:limit]
         last = rows[-1]
-        next_cursor = _encode_cursor(last.created_at, last.id)
+        next_cursor = _encode_cursor(last.created_at, last.id)  # type: ignore[arg-type]
 
     return PaginatedEntries(
         items=[EntryResponse.model_validate(e) for e in rows],
