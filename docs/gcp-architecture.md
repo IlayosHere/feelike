@@ -6,19 +6,10 @@ Independent from `forex-dashboard`, but mirrors its proven patterns.
 
 ## Project topology
 
-**Decision pending** — pick one before Phase 3:
+**Decision: New GCP project** (`feelike-prod`) — ADR 009.
 
-**Option 1: New GCP project** (`feelike-prod`)
-- Fully independent billing, IAM, and service namespace.
-- Cleanest, recommended for production apps.
-- Adds ~30 min of setup (project creation, billing link, APIs enable).
-
-**Option 2: Reuse existing forex-dashboard GCP project**
-- Add `feelike-api`, `feelike-db` as new services/instances in the same project.
-- Shared billing. IAM stays clean if using separate service accounts.
-- Faster setup, but coupled fate.
-
-**Leaning Option 1** for clean separation and because a personal-data journaling app deserves its own project-level permissions envelope.
+Fully independent billing, IAM, and service namespace. Separate from `forex-dashboard`.
+Patterns and Terraform module structure are inspired by `forex-dashboard` but this is its own codebase — no shared state, no shared project.
 
 ---
 

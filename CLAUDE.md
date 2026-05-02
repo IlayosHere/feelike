@@ -146,7 +146,7 @@ These are known unresolved questions that should be answered in the first Phase 
 
 - **ADR 007 — state management.** React Query for server state + Zustand for UI state is asserted in the tech stack table but not justified vs Redux Toolkit / Jotai / TanStack alone. Write before wiring any screens.
 - **ADR 008 — styling library.** NativeWind is the current choice but wasn't formally compared against Tamagui / Restyle / plain StyleSheet. Write before first screen commit.
-- **ADR 009 — GCP project topology.** `docs/gcp-architecture.md` currently says "leaning Option 1" (new GCP project). Resolve before Phase 3 Terraform.
+- **ADR 009 — GCP project topology.** ✅ Resolved — new GCP project `feelike-prod`. See `docs/adr/009-gcp-project-topology.md`.
 
 ### Implementation questions to answer early
 

@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>feelike — Tag Suggestions UX Comparison</title>
+<style>
+/* =========================================================
+   DESIGN TOKENS (exact values from ux-spec.md)
+   ========================================================= */
+:root {
+  --bg:              #FAFAFF;
+  --surface:         #FFFFFF;
+  --surface-sunken:  #F4F4FB;
+  --surface-raised:  #FFFFFF;
+
+  --text-primary:    #1A1033;
+  --text-secondary:  #7B6FA6;
+  --text-muted:      #9B9BAD;
+  --text-on-accent:  #FFFFFF;
+
+  --accent:          #7C5CFC;
+  --accent-orange:   #FF9A6B;
+  --accent-coral:    #FF5D73;
+  --border:          #E8E4FF;
+  --border-strong:   #C4B8FF;
+
+  --tag-pink-bg:     #FFE4EC;
+  --tag-pink-ink:    #C73E5A;
+  --tag-purple-bg:   #EEE4FF;
+  --tag-purple-ink:  #6B3FB8;
+  --tag-blue-bg:     #E4F3FF;
+  --tag-blue-ink:    #2D6FBF;
+  --tag-green-bg:    #E8F6E4;
+  --tag-green-ink:   #4A8E3A;
+
+  --save-gradient:   linear-gradient(135deg, #FF5D73, #FF9A6B);
+  --overlay:         rgba(11,11,15,0.45);
+
+  --shadow-sm:  0 1px 3px rgba(127,127,213,0.08);
+  --shadow-md:  0 4px 14px rgba(127,127,213,0.10);
+  --shadow-lg:  0 10px 30px rgba(127,127,213,0.15);
+  --shadow-xl:  0 20px 50px rgba(127,127,213,0.20);
+
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-lg:   20px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  /* spacing: 4 8 12 16 24 32 48 */
+}
+
+/* =========================================================
+   PAGE SHELL
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #EDECF7;
+  min-height: 100vh;
+  padding: 48px 32px 64px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.page-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.page-header .tag-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.page-header .badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border-strong);
+  color: var(--text-secondary);
+  background: var(--surface);
+}
+
+/* Column layout */
+.panels {
+  display: grid;
+  grid-template-columns: repeat(3, 375px);
+  gap: 32px;
+  justify-content: center;
+  align-items: start;
+}
+
+/* Panel label */
+.panel-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.panel-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.panel-label .option-badge {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.option-a { background: var(--tag-purple-bg); color: var(--tag-purple-ink); }
+.option-b { background: var(--tag-blue-bg);   color: var(--tag-blue-ink); }
+.panel-label .state-note {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* =========================================================
+   PHONE FRAME
+   ========================================================= */
+.phone {
+  width: 375px;
+  height: 812px;
+  background: var(--bg);
+  border-radius: 44px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 2px #C4B8FF,
+    0 0 0 5px rgba(255,255,255,0.6),
+    var(--shadow-xl);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status bar */
+.status-bar {
+  height: 44px;
+  padding: 14px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: var(--bg);
+  z-index: 1;
+}
+.status-time {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.status-icons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.status-icons svg {
+  fill: var(--text-primary);
+  opacity: 0.75;
+}
+
+/* Nav bar */
+.nav-bar {
+  height: 52px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.nav-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.nav-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.nav-icon-btn svg { fill: var(--text-secondary); }
+
+/* Capture form body */
+.capture-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px;
+  position: relative;
+}
+
+/* Textarea */
+.textarea-wrap {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  border: 1.5px solid var(--border);
+  padding: 16px;
+  margin-bottom: 12px;
+  min-height: 130px;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+.textarea-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.textarea-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 1px;
+  margin-left: 1px;
+  vertical-align: middle;
+  animation: blink 1.1s step-start infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Mood row */
+.mood-section {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+.mood-row {
+  display: flex;
+  gap: 8px;
+}
+.mood-chip {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunken);
+  border: 1.5px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.mood-chip.selected {
+  background: linear-gradient(135deg, #FF5D73, #FF9A6B);
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(255,93,115,0.30);
+  transform: scale(1.1) rotate(-4deg);
+}
+.mood-chip.selected::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  background: #E64563;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+}
+
+/* Tag section (inline, above sheet panels) */
+.tag-section {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+.tag-chips-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tag-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--tag-pink-bg);
+  color: var(--tag-pink-ink);
+}
+.tag-chip .remove {
+  font-size: 13px;
+  opacity: 0.65;
+  line-height: 1;
+}
+.add-tag-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1.5px dashed var(--border-strong);
+  cursor: pointer;
+}
+.add-tag-btn svg { fill: var(--text-secondary); }
+
+/* Save button */
+.save-btn-wrap {
+  padding: 0 0 20px;
+  flex-shrink: 0;
+}
+.save-btn {
+  width: 100%;
+  height: 52px;
+  border-radius: var(--radius-lg);
+  background: var(--save-gradient);
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.01em;
+  box-shadow: 0 6px 20px rgba(255,93,115,0.35);
+  cursor: pointer;
+  gap: 8px;
+}
+
+/* =========================================================
+   OVERLAY (behind bottom sheet)
+   ========================================================= */
+.sheet-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 10;
+  border-radius: 44px;
+  pointer-events: none;
+}
+
+/* =========================================================
+   BOTTOM SHEET
+   ========================================================= */
+.bottom-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  z-index: 20;
+  padding: 0 0 32px;
+  box-shadow: 0 -8px 32px rgba(127,127,213,0.18);
+}
+.sheet-handle-row {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 12px;
+}
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+}
+.sheet-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 16px 10px;
+}
+.sheet-search-wrap {
+  padding: 0 16px 14px;
+}
+.sheet-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-sunken);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+}
+.sheet-search.focused {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,92,252,0.12);
+  background: #FFFFFF;
+}
+.sheet-search svg { fill: var(--text-muted); flex-shrink: 0; }
+.sheet-search-input {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+.sheet-search-input.placeholder { color: var(--text-muted); }
+.sheet-search-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 1px;
+  animation: blink 1.1s step-start infinite;
+}
+
+/* Tag grid in sheet */
+.sheet-tag-grid {
+  padding: 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sheet-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: opacity 0.12s;
+}
+.sheet-tag.st-pink   { background: var(--tag-pink-bg); color: var(--tag-pink-ink); }
+.sheet-tag.st-purple { background: var(--tag-purple-bg); color: var(--tag-purple-ink); }
+.sheet-tag.st-blue   { background: var(--tag-blue-bg); color: var(--tag-blue-ink); }
+.sheet-tag.st-green  { background: var(--tag-green-bg); color: var(--tag-green-ink); }
+
+/* Already-selected tags in sheet: dimmed + checkmark */
+.sheet-tag.already-selected {
+  opacity: 0.45;
+}
+.sheet-tag .check-icon {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* No match empty */
+.sheet-no-match {
+  padding: 20px 16px 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+}
+
+/* Create new tag row */
+.create-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 0 16px;
+  background: rgba(124,92,252,0.06);
+  border: 1.5px solid rgba(124,92,252,0.20);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+.create-tag-pill {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--tag-pink-bg);
+  color: var(--tag-pink-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+.create-tag-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.create-tag-icon {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.create-tag-icon svg { fill: #FFFFFF; }
+
+/* Keyboard simulator bar */
+.keyboard-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: #D1D3D8;
+  border-radius: 0 0 44px 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  pointer-events: none;
+}
+.keyboard-hint-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8A8E9A;
+}
+
+/* =========================================================
+   OPTION B — INLINE EXPANSION
+   ========================================================= */
+.inline-expanded {
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.inline-expanded-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.inline-expanded-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.inline-close-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.inline-close-btn svg { fill: var(--text-muted); }
+
+.inline-search-wrap {
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.inline-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface-sunken);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 8px 12px;
+  box-shadow: 0 0 0 3px rgba(124,92,252,0.10);
+}
+.inline-search svg { fill: var(--text-muted); flex-shrink: 0; }
+.inline-search-input {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+.inline-search-input.placeholder { color: var(--text-muted); }
+
+.inline-tag-grid {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.inline-create-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 2px;
+  cursor: pointer;
+}
+
+/* =========================================================
+   ANNOTATIONS
+   ========================================================= */
+.annotation-block {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.annotation-block h4 {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.annotation-block ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.annotation-block li {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding-left: 14px;
+  position: relative;
+}
+.annotation-block li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+.annotation-block li strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Divider between panels */
+.panel-divider {
+  display: none; /* handled by gap */
+}
+
+/* Footer comparison table */
+.comparison {
+  margin: 56px auto 0;
+  max-width: 800px;
+}
+.comparison h2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.comparison table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+}
+.comparison thead tr {
+  background: linear-gradient(90deg, rgba(124,92,252,0.08), rgba(124,92,252,0.04));
+  border-bottom: 2px solid var(--border-strong);
+}
+.comparison th {
+  padding: 12px 16px;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-align: left;
+}
+.comparison td {
+  padding: 11px 16px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.comparison tr:last-child td { border-bottom: none; }
+.comparison tr:hover td { background: rgba(124,92,252,0.03); }
+.comparison td:first-child { color: var(--text-primary); font-weight: 600; }
+.pro  { color: #4A8E3A; font-weight: 600; }
+.con  { color: #C73E5A; font-weight: 600; }
+.neutral { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+<div class="page-header">
+  <h1>feelike — Tag Suggestions UX Comparison</h1>
+  <p>Comparing two patterns for immediate tag suggestions when a user taps "+ add" on the capture screen. Tokens from <code>ux-spec.md</code>. Light mode.</p>
+  <div class="tag-row">
+    <span class="badge">Option A: Bottom Sheet</span>
+    <span class="badge">Option B: Inline Expansion</span>
+    <span class="badge">Light mode</span>
+    <span class="badge">375 × 812</span>
+  </div>
+</div>
+
+<!-- =========================================================
+     PANELS
+     ========================================================= -->
+<div class="panels">
+
+  <!-- ====================================================
+       PANEL 1 — Option A: Bottom Sheet, initial open state
+       ==================================================== -->
+  <div class="panel-wrap">
+    <div class="panel-label">
+      <span class="option-badge option-a">Option A</span> Bottom Sheet
+      <span class="state-note">Initial open — all past tags visible</span>
+    </div>
+
+    <div class="phone" id="phone-a1">
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <!-- Signal -->
+          <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="0.5"/><rect x="4.5" y="5" width="3" height="7" rx="0.5"/><rect x="9" y="2" width="3" height="10" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" opacity="0.35"/></svg>
+          <!-- WiFi -->
+          <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm0-3.5a5.5 5.5 0 0 1 3.9 1.6l-1.4 1.4A3.5 3.5 0 0 0 8 7.9a3.5 3.5 0 0 0-2.5 1l-1.4-1.4A5.5 5.5 0 0 1 8 6zm0-4a9 9 0 0 1 6.4 2.6L13 6a7 7 0 0 0-10 0L1.6 4.6A9 9 0 0 1 8 2z" opacity="0.75"/></svg>
+          <!-- Battery -->
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="21" height="10" rx="2.5" stroke="#1A1033" stroke-width="1.2" fill="none" opacity="0.75"/><rect x="1.5" y="2.5" width="16" height="7" rx="1.5" opacity="0.75"/><path d="M22.5 4v4a2 2 0 0 0 0-4z" opacity="0.5"/></svg>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <div class="nav-bar">
+        <div class="nav-icon-btn">
+          <svg width="16" height="14" viewBox="0 0 16 14"><rect y="0" width="16" height="1.8" rx="0.9"/><rect y="6.1" width="10" height="1.8" rx="0.9"/><rect y="12.2" width="16" height="1.8" rx="0.9"/></svg>
+        </div>
+        <span class="nav-title">feelike</span>
+        <div class="nav-icon-btn">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M6.5 1a5.5 5.5 0 1 1 0 11A5.5 5.5 0 0 1 6.5 1zm0 1.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm4.72 7.72 2.78 2.78-1.06 1.06-2.78-2.78 1.06-1.06z"/></svg>
+        </div>
+      </div>
+
+      <!-- Capture body -->
+      <div class="capture-body">
+
+        <!-- Textarea -->
+        <div class="textarea-wrap">
+          <div class="textarea-text">went for a morning walk through the park — forgot how much I needed that<span class="textarea-cursor"></span></div>
+        </div>
+
+        <!-- Mood -->
+        <div class="mood-section">
+          <div class="section-label">Mood</div>
+          <div class="mood-row">
+            <div class="mood-chip selected">😊</div>
+            <div class="mood-chip">😔</div>
+            <div class="mood-chip">😤</div>
+            <div class="mood-chip">🤩</div>
+            <div class="mood-chip">😌</div>
+            <div class="mood-chip">😰</div>
+          </div>
+        </div>
+
+        <!-- Tags (existing chips + add button) -->
+        <div class="tag-section">
+          <div class="section-label">Tags</div>
+          <div class="tag-chips-row">
+            <div class="tag-chip">#work <span class="remove">×</span></div>
+            <div class="tag-chip">#ideas <span class="remove">×</span></div>
+            <div class="add-tag-btn">
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1v8M1 5h8" stroke="#7B6FA6" stroke-width="1.5" stroke-linecap="round"/></svg>
+              add
+            </div>
+          </div>
+        </div>
+
+        <!-- Save -->
+        <div class="save-btn-wrap" style="margin-top:auto;">
+          <div class="save-btn">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M15.5 9A6.5 6.5 0 1 1 2.5 9a6.5 6.5 0 0 1 13 0zm-9 .5 2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Save entry
+          </div>
+        </div>
+
+      </div><!-- /capture-body -->
+
+      <!-- Overlay -->
+      <div class="sheet-overlay"></div>
+
+      <!-- Bottom Sheet -->
+      <div class="bottom-sheet">
+        <div class="sheet-handle-row"><div class="sheet-handle"></div></div>
+        <div class="sheet-title">Tags</div>
+
+        <!-- Search input — focused, empty -->
+        <div class="sheet-search-wrap">
+          <div class="sheet-search focused">
+            <svg width="15" height="15" viewBox="0 0 15 15"><path d="M6 1a5 5 0 1 1 0 10A5 5 0 0 1 6 1zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm4.56 7.06 2.44 2.44-.94.94-2.44-2.44.94-.94z"/></svg>
+            <span class="sheet-search-input placeholder">Search or create tag…</span>
+            <span class="sheet-search-cursor"></span>
+          </div>
+        </div>
+
+        <!-- All past tags -->
+        <div class="sheet-tag-grid">
+          <!-- Already selected — dimmed + checkmark -->
+          <div class="sheet-tag st-pink already-selected"><span class="check-icon">✓</span>#work</div>
+          <div class="sheet-tag st-pink already-selected"><span class="check-icon">✓</span>#ideas</div>
+          <!-- Available -->
+          <div class="sheet-tag st-purple">#personal</div>
+          <div class="sheet-tag st-green">#grateful</div>
+          <div class="sheet-tag st-blue">#health</div>
+          <div class="sheet-tag st-green">#travel</div>
+        </div>
+      </div>
+
+    </div><!-- /phone -->
+
+    <!-- Annotation -->
+    <div class="annotation-block">
+      <h4>Behavior notes</h4>
+      <ul>
+        <li><strong>Sheet slides up</strong> from bottom over 220ms (ease-standard) on "+ add" tap.</li>
+        <li><strong>All past tags shown immediately</strong> — zero-char state is not empty.</li>
+        <li><strong>Already-selected tags dimmed to 45% opacity</strong> with a checkmark — visible but clearly off-limits. Not hidden (lets user confirm what's already picked).</li>
+        <li><strong>Search auto-focused</strong> — keyboard opens, user can type straight away.</li>
+        <li>Drag handle communicates dismissibility (swipe down or tap overlay).</li>
+      </ul>
+    </div>
+
+  </div><!-- /panel-wrap A1 -->
+
+
+  <!-- ====================================================
+       PANEL 2 — Option A: Bottom Sheet, filtered "meet" state
+       ==================================================== -->
+  <div class="panel-wrap">
+    <div class="panel-label">
+      <span class="option-badge option-a">Option A</span> Bottom Sheet
+      <span class="state-note">Typed "meet" — no existing match → create CTA</span>
+    </div>
+
+    <div class="phone" id="phone-a2">
+
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="0.5"/><rect x="4.5" y="5" width="3" height="7" rx="0.5"/><rect x="9" y="2" width="3" height="10" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" opacity="0.35"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm0-3.5a5.5 5.5 0 0 1 3.9 1.6l-1.4 1.4A3.5 3.5 0 0 0 8 7.9a3.5 3.5 0 0 0-2.5 1l-1.4-1.4A5.5 5.5 0 0 1 8 6zm0-4a9 9 0 0 1 6.4 2.6L13 6a7 7 0 0 0-10 0L1.6 4.6A9 9 0 0 1 8 2z" opacity="0.75"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="21" height="10" rx="2.5" stroke="#1A1033" stroke-width="1.2" fill="none" opacity="0.75"/><rect x="1.5" y="2.5" width="16" height="7" rx="1.5" opacity="0.75"/><path d="M22.5 4v4a2 2 0 0 0 0-4z" opacity="0.5"/></svg>
+        </div>
+      </div>
+
+      <div class="nav-bar">
+        <div class="nav-icon-btn"><svg width="16" height="14" viewBox="0 0 16 14"><rect y="0" width="16" height="1.8" rx="0.9"/><rect y="6.1" width="10" height="1.8" rx="0.9"/><rect y="12.2" width="16" height="1.8" rx="0.9"/></svg></div>
+        <span class="nav-title">feelike</span>
+        <div class="nav-icon-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6.5 1a5.5 5.5 0 1 1 0 11A5.5 5.5 0 0 1 6.5 1zm0 1.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm4.72 7.72 2.78 2.78-1.06 1.06-2.78-2.78 1.06-1.06z"/></svg></div>
+      </div>
+
+      <div class="capture-body">
+        <div class="textarea-wrap">
+          <div class="textarea-text">went for a morning walk through the park — forgot how much I needed that</div>
+        </div>
+        <div class="mood-section">
+          <div class="section-label">Mood</div>
+          <div class="mood-row">
+            <div class="mood-chip selected">😊</div>
+            <div class="mood-chip">😔</div>
+            <div class="mood-chip">😤</div>
+            <div class="mood-chip">🤩</div>
+            <div class="mood-chip">😌</div>
+            <div class="mood-chip">😰</div>
+          </div>
+        </div>
+        <div class="tag-section">
+          <div class="section-label">Tags</div>
+          <div class="tag-chips-row">
+            <div class="tag-chip">#work <span class="remove">×</span></div>
+            <div class="tag-chip">#ideas <span class="remove">×</span></div>
+            <div class="add-tag-btn"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1v8M1 5h8" stroke="#7B6FA6" stroke-width="1.5" stroke-linecap="round"/></svg> add</div>
+          </div>
+        </div>
+        <div class="save-btn-wrap" style="margin-top:auto;">
+          <div class="save-btn"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M15.5 9A6.5 6.5 0 1 1 2.5 9a6.5 6.5 0 0 1 13 0zm-9 .5 2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Save entry</div>
+        </div>
+      </div>
+
+      <div class="sheet-overlay"></div>
+
+      <div class="bottom-sheet">
+        <div class="sheet-handle-row"><div class="sheet-handle"></div></div>
+        <div class="sheet-title">Tags</div>
+
+        <!-- Search with "meet" typed -->
+        <div class="sheet-search-wrap">
+          <div class="sheet-search focused">
+            <svg width="15" height="15" viewBox="0 0 15 15"><path d="M6 1a5 5 0 1 1 0 10A5 5 0 0 1 6 1zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm4.56 7.06 2.44 2.44-.94.94-2.44-2.44.94-.94z"/></svg>
+            <span class="sheet-search-input">meet</span>
+            <span class="sheet-search-cursor"></span>
+          </div>
+        </div>
+
+        <!-- Create row appears AT TOP — primary CTA when no matches -->
+        <div class="create-tag-row" style="margin-bottom: 12px;">
+          <div class="create-tag-pill">#meet</div>
+          <div class="create-tag-label">create new tag</div>
+          <div class="create-tag-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 1v8M1 5h8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <!-- Empty tag grid — no matches -->
+        <div class="sheet-no-match">No existing tags match "meet"</div>
+
+      </div>
+
+    </div><!-- /phone -->
+
+    <div class="annotation-block">
+      <h4>Behavior notes</h4>
+      <ul>
+        <li><strong>Create row surfaces at top</strong> when no existing tags match — it becomes the only actionable item, so it claims the primary position.</li>
+        <li>Pill shows <strong>#meet</strong> in tag-pink so the user sees exactly what will be created before confirming.</li>
+        <li><strong>No matches text</strong> explains why the grid is empty — removes confusion vs. silent blank space.</li>
+        <li>On create tap: sheet closes, new tag chip appears in the entry form, <code>#meet</code> added to user's tag library.</li>
+      </ul>
+    </div>
+
+  </div><!-- /panel-wrap A2 -->
+
+
+  <!-- ====================================================
+       PANEL 3 — Option B: Inline Expansion with "meet" typed
+       ==================================================== -->
+  <div class="panel-wrap">
+    <div class="panel-label">
+      <span class="option-badge option-b">Option B</span> Inline Expansion
+      <span class="state-note">Accordion open · typed "meet" · Save still visible</span>
+    </div>
+
+    <div class="phone" id="phone-b">
+
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="0.5"/><rect x="4.5" y="5" width="3" height="7" rx="0.5"/><rect x="9" y="2" width="3" height="10" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" opacity="0.35"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm0-3.5a5.5 5.5 0 0 1 3.9 1.6l-1.4 1.4A3.5 3.5 0 0 0 8 7.9a3.5 3.5 0 0 0-2.5 1l-1.4-1.4A5.5 5.5 0 0 1 8 6zm0-4a9 9 0 0 1 6.4 2.6L13 6a7 7 0 0 0-10 0L1.6 4.6A9 9 0 0 1 8 2z" opacity="0.75"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="21" height="10" rx="2.5" stroke="#1A1033" stroke-width="1.2" fill="none" opacity="0.75"/><rect x="1.5" y="2.5" width="16" height="7" rx="1.5" opacity="0.75"/><path d="M22.5 4v4a2 2 0 0 0 0-4z" opacity="0.5"/></svg>
+        </div>
+      </div>
+
+      <div class="nav-bar">
+        <div class="nav-icon-btn"><svg width="16" height="14" viewBox="0 0 16 14"><rect y="0" width="16" height="1.8" rx="0.9"/><rect y="6.1" width="10" height="1.8" rx="0.9"/><rect y="12.2" width="16" height="1.8" rx="0.9"/></svg></div>
+        <span class="nav-title">feelike</span>
+        <div class="nav-icon-btn"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6.5 1a5.5 5.5 0 1 1 0 11A5.5 5.5 0 0 1 6.5 1zm0 1.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm4.72 7.72 2.78 2.78-1.06 1.06-2.78-2.78 1.06-1.06z"/></svg></div>
+      </div>
+
+      <!-- Slightly shorter textarea to give accordion room -->
+      <div class="capture-body">
+        <div class="textarea-wrap" style="min-height:100px;">
+          <div class="textarea-text">went for a morning walk through the park — forgot how much I needed that</div>
+        </div>
+
+        <div class="mood-section">
+          <div class="section-label">Mood</div>
+          <div class="mood-row">
+            <div class="mood-chip selected">😊</div>
+            <div class="mood-chip">😔</div>
+            <div class="mood-chip">😤</div>
+            <div class="mood-chip">🤩</div>
+            <div class="mood-chip">😌</div>
+            <div class="mood-chip">😰</div>
+          </div>
+        </div>
+
+        <!-- Existing selected tag chips above the expanded section -->
+        <div class="tag-section" style="margin-bottom:8px;">
+          <div class="section-label">Tags</div>
+          <div class="tag-chips-row">
+            <div class="tag-chip">#work <span class="remove">×</span></div>
+            <div class="tag-chip">#ideas <span class="remove">×</span></div>
+          </div>
+        </div>
+
+        <!-- INLINE EXPANDED SECTION -->
+        <div class="inline-expanded">
+          <!-- Header -->
+          <div class="inline-expanded-header">
+            <span class="inline-expanded-title">Add tag</span>
+            <div class="inline-close-btn">
+              <svg width="8" height="8" viewBox="0 0 8 8"><path d="M1 1l6 6M7 1L1 7" stroke="#7B6FA6" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+
+          <!-- Search with "meet" typed -->
+          <div class="inline-search-wrap">
+            <div class="inline-search">
+              <svg width="13" height="13" viewBox="0 0 13 13"><path d="M5.5 1a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zm0 1.3a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zm3.9 6.4 1.9 1.9-.9.9-1.9-1.9.9-.9z"/></svg>
+              <span class="inline-search-input">meet<span class="sheet-search-cursor"></span></span>
+            </div>
+          </div>
+
+          <!-- Create row at top (no matches) -->
+          <div class="inline-create-row">
+            <div class="create-tag-pill">#meet</div>
+            <div class="create-tag-label">create new tag</div>
+            <div class="create-tag-icon">
+              <svg width="9" height="9" viewBox="0 0 9 9"><path d="M4.5 1v7M1 4.5h7" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+
+          <!-- Inline tag grid — all tags shown, dimmed if selected -->
+          <div class="inline-tag-grid">
+            <div class="sheet-tag st-pink already-selected" style="font-size:12px; padding:5px 10px;"><span class="check-icon">✓</span>#work</div>
+            <div class="sheet-tag st-pink already-selected" style="font-size:12px; padding:5px 10px;"><span class="check-icon">✓</span>#ideas</div>
+            <div class="sheet-tag st-purple" style="font-size:12px; padding:5px 10px;">#personal</div>
+            <div class="sheet-tag st-green" style="font-size:12px; padding:5px 10px;">#grateful</div>
+            <div class="sheet-tag st-blue" style="font-size:12px; padding:5px 10px;">#health</div>
+            <div class="sheet-tag st-green" style="font-size:12px; padding:5px 10px;">#travel</div>
+          </div>
+        </div><!-- /inline-expanded -->
+
+        <!-- Save still fully visible below the expanded section -->
+        <div class="save-btn-wrap" style="margin-top:auto; padding-top:8px;">
+          <div class="save-btn"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M15.5 9A6.5 6.5 0 1 1 2.5 9a6.5 6.5 0 0 1 13 0zm-9 .5 2 2 4-4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Save entry</div>
+        </div>
+
+      </div><!-- /capture-body -->
+
+    </div><!-- /phone -->
+
+    <div class="annotation-block">
+      <h4>Behavior notes</h4>
+      <ul>
+        <li><strong>No overlay</strong> — form context stays visible; user can see the entry text and mood while tagging.</li>
+        <li><strong>Save button remains reachable</strong> — user can skip tagging without a dismiss gesture.</li>
+        <li>Accordion animates open at 220ms (ease-standard); closing via × button or tapping outside the section.</li>
+        <li><strong>All past tags still visible</strong> even when "meet" is typed — grid is not filtered out, because the create row is the primary action but familiar tags should remain scannable.</li>
+        <li>Note: if the user has many tags (20+) this inline grid becomes a scrolling list capped at ~120px height.</li>
+      </ul>
+    </div>
+
+  </div><!-- /panel-wrap B -->
+
+</div><!-- /panels -->
+
+
+<!-- =========================================================
+     COMPARISON TABLE
+     ========================================================= -->
+<div class="comparison">
+  <h2>Pattern tradeoffs</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>Option A — Bottom Sheet</th>
+        <th>Option B — Inline Expansion</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Tag grid real estate</td>
+        <td><span class="pro">Large</span> — sheet uses full width, comfortable tag targets</td>
+        <td><span class="con">Compact</span> — bounded by remaining form height</td>
+      </tr>
+      <tr>
+        <td>Save button reachability</td>
+        <td><span class="con">Hidden behind sheet</span> — must dismiss first to save</td>
+        <td><span class="pro">Always visible</span> — no extra dismiss gesture needed</td>
+      </tr>
+      <tr>
+        <td>Entry text visible during tagging</td>
+        <td><span class="con">Obscured by overlay + sheet</span></td>
+        <td><span class="pro">Fully visible</span> — user can re-read entry while picking tags</td>
+      </tr>
+      <tr>
+        <td>Keyboard interaction</td>
+        <td>Sheet sits above keyboard area — standard iOS/Android pattern; keyboard pushes sheet up naturally</td>
+        <td>Keyboard pushes the whole form up; save button may scroll off on small phones</td>
+      </tr>
+      <tr>
+        <td>Gesture to dismiss</td>
+        <td>Swipe down or tap overlay — familiar bottom-sheet convention</td>
+        <td>Tap × or tap outside section — less standardized</td>
+      </tr>
+      <tr>
+        <td>Design principle alignment</td>
+        <td>
+          <span class="pro">Capture first</span> — dedicated surface for tags feels intentional, not forced.<br/>
+          <span class="neutral">One extra dismiss gesture</span> vs. inline.
+        </td>
+        <td>
+          <span class="pro">Every tap is a cost</span> — no extra dismiss needed.<br/>
+          <span class="neutral">Crowded on small screens with 10+ tags.</span>
+        </td>
+      </tr>
+      <tr>
+        <td>Scalability (many tags)</td>
+        <td><span class="pro">Sheet scrolls gracefully</span> — grid expands within sheet height, user can scroll</td>
+        <td><span class="con">Inline section caps at fixed height</span> — requires internal scroll, which competes with form scroll</td>
+      </tr>
+      <tr>
+        <td>Platform precedent</td>
+        <td>iOS Share Sheet, Apple Maps suggestions, Instagram location picker</td>
+        <td>Twitter "Add Location" accordion, inline autocomplete in form fields</td>
+      </tr>
+      <tr>
+        <td>Recommendation</td>
+        <td colspan="2" style="color: var(--text-primary); font-weight: 700;">
+          Option A (Bottom Sheet) is preferred for feelike v1. The tag grid benefits from the larger surface, the keyboard-above-sheet layout is a well-worn mobile pattern, and the dismiss gesture (swipe down) is universally understood. The one cost — hiding the Save button — is acceptable because the bottom sheet is a transient state with a clear exit path. If the user has 0 past tags, the sheet shows only the empty-search-then-create flow, which is equally clear.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>
