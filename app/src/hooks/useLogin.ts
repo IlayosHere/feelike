@@ -18,7 +18,10 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async (input: LoginInput) => {
-      const raw = await apiClient.post<unknown>('/api/auth/login', input);
+      const raw = await apiClient.postForm<unknown>('/api/auth/login', {
+        username: input.email,
+        password: input.password,
+      });
       return AuthResponseSchema.parse(raw);
     },
     onSuccess: async (data) => {

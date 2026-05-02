@@ -30,6 +30,7 @@ export function useCreateEntry() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['entries'] });
+      void queryClient.invalidateQueries({ queryKey: ['tags'] });
     },
   });
 }

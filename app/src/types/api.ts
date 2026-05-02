@@ -23,11 +23,13 @@ export type User = {
   id: string;
   email: string;
   display_name: string | null;
+  created_at: string;
 };
 
 export type Tag = {
   id: string;
   name: string;
+  created_at: string;
 };
 
 export type PaginatedEntries = {
@@ -37,4 +39,5 @@ export type PaginatedEntries = {
 
 export type AuthResponse = {
   access_token: string;
+  token_type: string;
 };

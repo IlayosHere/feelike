@@ -1,4 +1,5 @@
-import type { Entry, MoodValue, Tag, User } from '@/types/api';
+/// <reference types="node" />
+import type { Entry, MoodValue, PaginatedEntries, Tag, User } from '@/types/api';
 
 // ─── Internal types ───────────────────────────────────────────────────────────
 
@@ -33,13 +34,14 @@ const SEED_USER: StoredUser = {
   id: 'user-1',
   email: 'demo@feelike.app',
   display_name: 'Demo User',
+  created_at: '2026-01-01T00:00:00.000Z',
   passwordHash: 'password123',
 };
 
 const SEED_TAGS: StoredTag[] = [
-  { id: 'tag-work', name: 'work', userId: 'user-1' },
-  { id: 'tag-personal', name: 'personal', userId: 'user-1' },
-  { id: 'tag-ideas', name: 'ideas', userId: 'user-1' },
+  { id: 'tag-work', name: 'work', userId: 'user-1', created_at: '2026-01-01T00:00:00.000Z' },
+  { id: 'tag-personal', name: 'personal', userId: 'user-1', created_at: '2026-01-01T00:00:00.000Z' },
+  { id: 'tag-ideas', name: 'ideas', userId: 'user-1', created_at: '2026-01-01T00:00:00.000Z' },
 ];
 
 const SEED_ENTRIES: StoredEntry[] = [
@@ -99,13 +101,11 @@ seedDatabase();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-type PaginatedResult = { items: Entry[]; next_cursor: string | null };
-
 export function getEntriesForUser(
   userId: string,
   limit: number,
   cursor: string | null,
-): PaginatedResult {
+): PaginatedEntries {
   const allUserEntries = Array.from(db.entries.values())
     .filter((e) => e.userId === userId)
     .sort((a, b) => {
@@ -120,7 +120,7 @@ export function getEntriesForUser(
     const decoded = decodeCursor(cursor);
     if (decoded !== null) {
       const idx = allUserEntries.findIndex(
-        (e) => e.created_at === decoded.created_at && e.id === decoded.id,
+        (e) => e.created_at.slice(0, 19) === decoded.created_at.slice(0, 19) && e.id === decoded.id,
       );
       startIndex = idx === -1 ? allUserEntries.length : idx + 1;
     }
@@ -154,6 +154,18 @@ export function createEntry(
   };
 
   db.entries.set(id, entry);
+
+  // Persist any new tag names to the tag store so they appear in autocomplete
+  for (const name of entry.tags) {
+    const exists = Array.from(db.tags.values()).some(
+      (t) => t.userId === userId && t.name === name,
+    );
+    if (!exists) {
+      const tagId = `tag-${userId}-${name}-${Date.now()}`;
+      db.tags.set(tagId, { id: tagId, name, userId, created_at: now });
+    }
+  }
+
   return stripUserId(entry);
 }
 
@@ -174,6 +186,21 @@ export function updateEntry(
   };
 
   db.entries.set(entryId, updated);
+
+  // Persist any new tag names to the tag store
+  if (data.tags) {
+    const now = new Date().toISOString();
+    for (const name of data.tags) {
+      const exists = Array.from(db.tags.values()).some(
+        (t) => t.userId === userId && t.name === name,
+      );
+      if (!exists) {
+        const tagId = `tag-${userId}-${name}-${Date.now()}`;
+        db.tags.set(tagId, { id: tagId, name, userId, created_at: now });
+      }
+    }
+  }
+
   return stripUserId(updated);
 }
 
@@ -196,24 +223,23 @@ export function getTagsForUser(userId: string): Tag[] {
 type CursorPayload = { created_at: string; id: string };
 
 function encodeCursor(created_at: string, id: string): string {
-  // btoa is available in React Native (Hermes/JSC) and modern runtimes
-  return btoa(JSON.stringify({ created_at, id }));
+  const ts = created_at.slice(0, 19).replace('T', ' ');
+  const raw = `${ts},${id}`;
+  return Buffer.from(raw, 'utf8').toString('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 function decodeCursor(cursor: string): CursorPayload | null {
   try {
-    const parsed: unknown = JSON.parse(atob(cursor));
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      'created_at' in parsed &&
-      'id' in parsed &&
-      typeof (parsed as Record<string, unknown>).created_at === 'string' &&
-      typeof (parsed as Record<string, unknown>).id === 'string'
-    ) {
-      return parsed as CursorPayload;
-    }
-    return null;
+    const b64 = cursor.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = b64 + '=='.slice(0, (4 - b64.length % 4) % 4);
+    const raw = Buffer.from(padded, 'base64').toString('utf8');
+    const commaIdx = raw.indexOf(',');
+    if (commaIdx === -1) return null;
+    const created_at_str = raw.slice(0, commaIdx);
+    const id = raw.slice(commaIdx + 1);
+    const created_at = created_at_str.replace(' ', 'T') + '.000Z';
+    return { created_at, id };
   } catch {
     return null;
   }

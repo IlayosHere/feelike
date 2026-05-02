@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/stores/authStore';
 
-export const BASE_URL = 'http://localhost:8000';
+export const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 type ApiClientOptions = RequestInit & { token?: string };
 
@@ -29,8 +29,8 @@ async function request<T>(path: string, options: ApiClientOptions = {}): Promise
   });
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: res.statusText })) as { message?: string };
-    throw new ApiError(res.status, error.message ?? res.statusText);
+    const error = await res.json().catch(() => ({})) as { detail?: string; message?: string };
+    throw new ApiError(res.status, error.detail ?? error.message ?? res.statusText);
   }
 
   // 204 No Content — return undefined cast to T
@@ -42,9 +42,20 @@ async function request<T>(path: string, options: ApiClientOptions = {}): Promise
 }
 
 export const apiClient = {
-  get: <T>(path: string) => request<T>(path),
+  get: <T>(path: string, params?: Record<string, string>) => {
+    const url = params ? `${path}?${new URLSearchParams(params).toString()}` : path;
+    return request<T>(url);
+  },
   post: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+  postForm: <T>(path: string, fields: Record<string, string>) => {
+    const body = new URLSearchParams(fields).toString();
+    return request<T>(path, {
+      method: 'POST',
+      body,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+  },
   patch: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: (path: string) => request<void>(path, { method: 'DELETE' }),

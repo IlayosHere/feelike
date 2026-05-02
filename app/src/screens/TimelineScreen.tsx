@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -14,11 +14,19 @@ import { useRouter } from 'expo-router';
 
 import { EntryCard } from '@/components/timeline/EntryCard';
 import { DayGroupHeader } from '@/components/timeline/DayGroupHeader';
+import { FilterBar } from '@/components/timeline/FilterBar';
 import { useEntries } from '@/hooks/useEntries';
+import { useTags } from '@/hooks/useTags';
+import { useTimelineFilter } from '@/hooks/useTimelineFilter';
 import { useTheme } from '@/theme/useTheme';
 import { GradientText } from '@/components/ui/GradientText';
 import { useSidePanel } from '@/context/SidePanelContext';
 import { buildListItems, type ListItem } from '@/utils/dateGrouping';
+
+const startOfDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+const endOfDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
 // ---------------------------------------------------------------------------
 // Skeleton
@@ -62,12 +70,39 @@ export function TimelineScreen() {
     isRefetching,
   } = useEntries();
 
+  const { data: tagsData } = useTags();
+  const filter = useTimelineFilter();
+  const [filterExpanded, setFilterExpanded] = useState(false);
+
   const allEntries = useMemo(
     () => data?.pages.flatMap((p) => p.items) ?? [],
     [data],
   );
 
-  const listItems = useMemo(() => buildListItems(allEntries), [allEntries]);
+  const allTags = useMemo(
+    () => tagsData?.map((t) => t.name) ?? [],
+    [tagsData],
+  );
+
+  const filteredEntries = useMemo(() => {
+    let result = allEntries;
+    if (filter.dateRange) {
+      const fromDay = startOfDay(filter.dateRange.from);
+      const toDay = endOfDay(filter.dateRange.to);
+      result = result.filter((e) => {
+        const d = new Date(e.created_at);
+        return d >= fromDay && d <= toDay;
+      });
+    }
+    if (filter.activeTags.length > 0) {
+      result = result.filter((e) =>
+        filter.activeTags.some((t) => e.tags.includes(t)),
+      );
+    }
+    return result;
+  }, [allEntries, filter.dateRange, filter.activeTags]);
+
+  const listItems = useMemo(() => buildListItems(filteredEntries), [filteredEntries]);
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -96,9 +131,23 @@ export function TimelineScreen() {
 
   const webFullHeight = Platform.OS === 'web' ? { height: '100%' as const } : undefined;
 
+  const isFilteredEmpty = allEntries.length > 0 && filteredEntries.length === 0;
+
   return (
     <SafeAreaView style={[{ flex: 1, backgroundColor: theme.bg }, webFullHeight]}>
-      <TimelineHeader onBack={() => router.back()} onNewEntry={() => router.back()} />
+      <TimelineHeader
+        onBack={() => router.back()}
+        onNewEntry={() => router.back()}
+        filterActive={filter.isActive}
+        filterExpanded={filterExpanded}
+        onToggleFilter={() => setFilterExpanded((v) => !v)}
+      />
+
+      <FilterBar
+        expanded={filterExpanded}
+        filter={filter}
+        allTags={allTags}
+      />
 
       {isLoading ? (
         <View className="flex-1">
@@ -108,6 +157,8 @@ export function TimelineScreen() {
         <ErrorState onRetry={() => void refetch()} />
       ) : allEntries.length === 0 ? (
         <EmptyState />
+      ) : isFilteredEmpty ? (
+        <FilteredEmptyState onClear={filter.clearAll} />
       ) : (
         <FlatList
           data={listItems}
@@ -137,29 +188,58 @@ export function TimelineScreen() {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-function TimelineHeader({
-  onBack,
-  onNewEntry,
-}: {
+type TimelineHeaderProps = {
   onBack: () => void;
   onNewEntry: () => void;
-}) {
+  filterActive: boolean;
+  filterExpanded: boolean;
+  onToggleFilter: () => void;
+};
+
+function TimelineHeader({
+  onNewEntry,
+  filterActive,
+  onToggleFilter,
+}: TimelineHeaderProps) {
   const { theme } = useTheme();
   const { open: openPanel } = useSidePanel();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 20, paddingBottom: 8 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 24,
+        paddingTop: 20,
+        paddingBottom: 8,
+      }}
+    >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Pressable
           onPress={openPanel}
           accessibilityRole="button"
           accessibilityLabel="Open menu"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: theme.surfaceSunken, alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 14,
+            backgroundColor: theme.surfaceSunken,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           <Text style={{ fontSize: 18, color: theme.textPrimary }}>{'≡'}</Text>
         </Pressable>
         <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-          <Text style={{ fontSize: 28, fontWeight: '800', letterSpacing: -0.5, color: theme.textPrimary }}>
+          <Text
+            style={{
+              fontSize: 28,
+              fontWeight: '800',
+              letterSpacing: -0.5,
+              color: theme.textPrimary,
+            }}
+          >
             {'Your '}
           </Text>
           <GradientText
@@ -171,15 +251,60 @@ function TimelineHeader({
           </GradientText>
         </View>
       </View>
-      <Pressable
-        onPress={onNewEntry}
-        accessibilityRole="button"
-        accessibilityLabel="New entry"
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: theme.surfaceSunken, alignItems: 'center', justifyContent: 'center' }}
-      >
-        <Text style={{ fontSize: 20, color: theme.textPrimary, fontWeight: '700' }}>{'+'}</Text>
-      </Pressable>
+
+      {/* Right side: filter button + new entry button */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        {/* Filter toggle button */}
+        <Pressable
+          onPress={onToggleFilter}
+          accessibilityRole="button"
+          accessibilityLabel="Toggle filter bar"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 14,
+            backgroundColor: theme.surfaceSunken,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 18, color: theme.textPrimary }}>{'⊟'}</Text>
+          {filterActive && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 6,
+                right: 6,
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: theme.accent,
+              }}
+            />
+          )}
+        </Pressable>
+
+        {/* New entry button */}
+        <Pressable
+          onPress={onNewEntry}
+          accessibilityRole="button"
+          accessibilityLabel="New entry"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 14,
+            backgroundColor: theme.surfaceSunken,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 20, color: theme.textPrimary, fontWeight: '700' }}>
+            {'+'}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -218,6 +343,24 @@ function EmptyState() {
   );
 }
 
+function FilteredEmptyState({ onClear }: { onClear: () => void }) {
+  const { theme } = useTheme();
+  return (
+    <View className="flex-1 items-center justify-center px-8">
+      <Text className="text-text-primary text-body font-sans-medium mb-2 text-center">
+        No entries match your filters.
+      </Text>
+      <Pressable
+        onPress={onClear}
+        accessibilityRole="button"
+        accessibilityLabel="Clear all filters"
+      >
+        <Text style={{ color: theme.accent }}>Clear filters</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 function NewEntryFab({ onPress }: { onPress: () => void }) {
   const { theme } = useTheme();
   return (
@@ -243,14 +386,14 @@ function NewEntryFab({ onPress }: { onPress: () => void }) {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          shadowColor: '#FF5D73',
+          shadowColor: theme.gradPrimaryStart,
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.35,
           shadowRadius: 8,
           elevation: 6,
         }}
       >
-        <Text style={{ color: '#FFFFFF', fontSize: 28, lineHeight: 32, fontWeight: '300' }}>
+        <Text style={{ color: theme.textOnAccent, fontSize: 28, lineHeight: 32, fontWeight: '300' }}>
           {'+'}
         </Text>
       </LinearGradient>

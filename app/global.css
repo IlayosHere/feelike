@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Tailwind Preflight sets border-width:1px on inputs; react-native-web expects 0 */
+input, textarea {
+  border-width: 0;
+  outline: none;
+}

@@ -19,8 +19,8 @@ function extractUserId(request: Request): string | null {
   return auth.slice(7) || null;
 }
 
-function unauthorizedResponse(): HttpResponse {
-  return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+function unauthorizedResponse() {
+  return HttpResponse.json({ detail: 'Unauthorized' }, { status: 401 });
 }
 
 // ─── Handlers ─────────────────────────────────────────────────────────────────
@@ -36,52 +36,49 @@ export const handlers = [
       typeof (body as Record<string, unknown>).email !== 'string' ||
       typeof (body as Record<string, unknown>).password !== 'string'
     ) {
-      return HttpResponse.json({ message: 'Invalid request body' }, { status: 400 });
+      return HttpResponse.json({ detail: 'Invalid request body' }, { status: 400 });
     }
 
     const { email, password } = body as { email: string; password: string };
 
-    const existing = Array.from(db.users.values()).find((u) => u.email === email);
+    const existing = Array.from(db.users.values()).find((u) => u.email === email.toLowerCase());
     if (existing) {
-      return HttpResponse.json({ message: 'Email already registered' }, { status: 409 });
+      return HttpResponse.json({ detail: 'Email already registered' }, { status: 409 });
     }
 
     const id = `user-${Date.now()}`;
     const newUser = {
       id,
-      email,
+      email: email.toLowerCase(),
       display_name: null,
+      created_at: new Date().toISOString(),
       passwordHash: password,
     };
     db.users.set(id, newUser);
 
-    return HttpResponse.json({ access_token: id }, { status: 201 });
+    return HttpResponse.json({ access_token: id, token_type: 'bearer' }, { status: 201 });
   }),
 
   // POST /api/auth/login
   http.post(`${BASE}/api/auth/login`, async ({ request }) => {
-    const body: unknown = await request.json();
+    const text = await request.text();
+    const params = new URLSearchParams(text);
+    const username = params.get('username');
+    const password = params.get('password');
 
-    if (
-      typeof body !== 'object' ||
-      body === null ||
-      typeof (body as Record<string, unknown>).email !== 'string' ||
-      typeof (body as Record<string, unknown>).password !== 'string'
-    ) {
-      return HttpResponse.json({ message: 'Invalid request body' }, { status: 400 });
+    if (!username || !password) {
+      return HttpResponse.json({ detail: 'Invalid request body' }, { status: 400 });
     }
 
-    const { email, password } = body as { email: string; password: string };
-
     const user = Array.from(db.users.values()).find(
-      (u) => u.email === email && u.passwordHash === password,
+      (u) => u.email === username.toLowerCase() && u.passwordHash === password,
     );
 
     if (!user) {
-      return HttpResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return HttpResponse.json({ detail: 'Invalid credentials' }, { status: 401 });
     }
 
-    return HttpResponse.json({ access_token: user.id });
+    return HttpResponse.json({ access_token: user.id, token_type: 'bearer' });
   }),
 
   // GET /api/auth/me
@@ -96,7 +93,39 @@ export const handlers = [
       id: user.id,
       email: user.email,
       display_name: user.display_name,
+      created_at: user.created_at ?? new Date().toISOString(),
     });
+  }),
+
+  // POST /api/auth/password
+  http.post(`${BASE}/api/auth/password`, async ({ request }) => {
+    const userId = extractUserId(request);
+    if (!userId) return unauthorizedResponse();
+
+    const body = await request.json() as { current_password?: string; new_password?: string };
+    const user = db.users.get(userId);
+    if (!user || user.passwordHash !== body.current_password) {
+      return HttpResponse.json({ detail: 'Invalid password' }, { status: 401 });
+    }
+
+    db.users.set(userId, { ...user, passwordHash: body.new_password ?? user.passwordHash });
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // DELETE /api/auth/me
+  http.delete(`${BASE}/api/auth/me`, ({ request }) => {
+    const userId = extractUserId(request);
+    if (!userId) return unauthorizedResponse();
+
+    db.users.delete(userId);
+    db.entries.forEach((entry, id) => {
+      if (entry.userId === userId) db.entries.delete(id);
+    });
+    db.tags.forEach((tag, id) => {
+      if (tag.userId === userId) db.tags.delete(id);
+    });
+
+    return new HttpResponse(null, { status: 204 });
   }),
 
   // POST /api/entries
@@ -111,7 +140,7 @@ export const handlers = [
       body === null ||
       typeof (body as Record<string, unknown>).content !== 'string'
     ) {
-      return HttpResponse.json({ message: 'content is required' }, { status: 400 });
+      return HttpResponse.json({ detail: 'content is required' }, { status: 400 });
     }
 
     const raw = body as {
@@ -135,7 +164,7 @@ export const handlers = [
     if (!userId) return unauthorizedResponse();
 
     const url = new URL(request.url);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '20', 10), 100);
+    const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10), 100);
     const cursor = url.searchParams.get('cursor') ?? null;
 
     const result = getEntriesForUser(userId, limit, cursor);
@@ -151,7 +180,7 @@ export const handlers = [
     const entry = db.entries.get(id);
 
     if (!entry || entry.userId !== userId) {
-      return HttpResponse.json({ message: 'Entry not found' }, { status: 404 });
+      return HttpResponse.json({ detail: 'Entry not found' }, { status: 404 });
     }
 
     const { userId: _uid, ...clean } = entry;
@@ -174,7 +203,7 @@ export const handlers = [
 
     const updated = updateEntry(userId, id, data);
     if (!updated) {
-      return HttpResponse.json({ message: 'Entry not found' }, { status: 404 });
+      return HttpResponse.json({ detail: 'Entry not found' }, { status: 404 });
     }
 
     return HttpResponse.json(updated);
@@ -189,7 +218,7 @@ export const handlers = [
     const deleted = deleteEntry(userId, id);
 
     if (!deleted) {
-      return HttpResponse.json({ message: 'Entry not found' }, { status: 404 });
+      return HttpResponse.json({ detail: 'Entry not found' }, { status: 404 });
     }
 
     return new HttpResponse(null, { status: 204 });
