@@ -1,0 +1,89 @@
+# terraform.yml — Plan and (manually) apply Terraform infrastructure changes.
+#
+# IMPORTANT: apply is NEVER run automatically on push.
+# Protecting Cloud SQL from accidental destruction requires a manual
+# workflow_dispatch with action=apply. Plan runs automatically on every
+# push that touches infra/terraform/** so reviewers can see the diff.
+#
+# Required GitHub secrets (same WIF credentials as deploy-api.yml):
+#   WIF_PROVIDER           — from: terraform output workload_identity_provider
+#   GCP_SA_EMAIL           — from: terraform output github_sa_email
+#   GCP_PROJECT_ID         — GCP project ID (e.g. feelike-prod)
+#   TF_VAR_DB_PASSWORD     — Cloud SQL database password
+#   TF_VAR_JWT_SECRET      — JWT signing secret
+
+name: Terraform
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infra/terraform/**"
+
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action to run"
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.action || 'plan' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud (WIF — no JSON key)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: terraform init
+        run: terraform init
+
+      - name: terraform fmt check
+        run: terraform fmt -check
+
+      - name: terraform validate
+        run: terraform validate
+
+      - name: terraform plan
+        id: plan
+        run: |
+          terraform plan -input=false -out=tfplan \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="github_repo=${{ github.repository }}"
+        env:
+          TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
+          TF_VAR_jwt_secret: ${{ secrets.TF_VAR_JWT_SECRET }}
+
+      - name: Post plan to step summary
+        run: |
+          echo "## Terraform Plan Summary" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          terraform show -no-color tfplan | grep -E '^\s*(#|~|[+-]|Plan:)' >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # Never run apply automatically on push — always require manual workflow_dispatch
+      # to protect Cloud SQL from accidental destruction.
+      - name: terraform apply
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+        run: terraform apply tfplan

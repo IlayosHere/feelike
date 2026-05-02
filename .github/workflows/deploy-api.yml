@@ -1,0 +1,104 @@
+# deploy-api.yml — Build the backend Docker image, push to Artifact Registry, and deploy to Cloud Run.
+#
+# Required GitHub secrets (set in repo Settings → Secrets and variables → Actions):
+#   WIF_PROVIDER          — from: terraform output workload_identity_provider
+#                           format: projects/NUMBER/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+#   GCP_SA_EMAIL          — from: terraform output github_sa_email
+#   ARTIFACT_REGISTRY_URL — from: terraform output artifact_registry_url (append /feelike)
+#                           e.g. europe-west1-docker.pkg.dev/feelike-prod/feelike
+#   ARTIFACT_REGISTRY_REGION — europe-west1
+#   GCP_REGION            — europe-west1
+#   GCP_PROJECT_ID        — feelike-prod
+#   CLOUD_RUN_SA_EMAIL    — from: terraform output cloud_run_sa_email (feelike-api-sa@...)
+
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Build, push, deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud (WIF — no JSON key)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ secrets.ARTIFACT_REGISTRY_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.ARTIFACT_REGISTRY_URL }}/api:${{ github.sha }} \
+            backend/
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.ARTIFACT_REGISTRY_URL }}/api:${{ github.sha }}
+
+      - name: Run database migrations
+        run: |
+          gcloud run jobs create feelike-migrate-${{ github.sha }} \
+            --image ${{ secrets.ARTIFACT_REGISTRY_URL }}/api:${{ github.sha }} \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --service-account ${{ secrets.CLOUD_RUN_SA_EMAIL }} \
+            --set-secrets "DATABASE_URL=feelike_database_url:latest" \
+            --command "alembic" \
+            --args "upgrade,head" \
+            --max-retries 1 \
+            --task-timeout 120s \
+            --quiet && \
+          gcloud run jobs execute feelike-migrate-${{ github.sha }} \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --wait \
+            --quiet && \
+          gcloud run jobs delete feelike-migrate-${{ github.sha }} \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --quiet
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy feelike-api \
+            --image ${{ secrets.ARTIFACT_REGISTRY_URL }}/api:${{ github.sha }} \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --service-account ${{ secrets.CLOUD_RUN_SA_EMAIL }} \
+            --quiet
+
+      - name: Smoke test — verify /healthz returns 200
+        run: |
+          SERVICE_URL=$(gcloud run services describe feelike-api \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --format='value(status.url)')
+          echo "Service URL: $SERVICE_URL"
+          for i in $(seq 1 12); do
+            echo "Attempt $i/12..."
+            if curl --fail --silent --show-error "${SERVICE_URL}/healthz"; then
+              echo "Health check passed."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Health check failed after 12 attempts." && exit 1

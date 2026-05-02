@@ -7,7 +7,7 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Always-runs guard so the CI status reflects reality even when app/ or backend/
@@ -42,8 +42,7 @@ jobs:
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install ruff mypy
+          pip install -r requirements-dev.txt
 
       - name: Ruff
         working-directory: backend
@@ -70,13 +69,12 @@ jobs:
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio
+          pip install -r requirements-dev.txt
 
       - name: Run tests
         working-directory: backend
         env:
-          DATABASE_URL: "sqlite:///./test.db"
+          DATABASE_URL: "sqlite:///:memory:"
           JWT_SECRET: "test-secret-not-for-prod"
         run: pytest -v
 
