@@ -2,6 +2,9 @@ module.exports = {
   extends: ['expo', 'plugin:@typescript-eslint/recommended'],
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
+  settings: {
+    'import/ignore': ['node_modules'],
+  },
   rules: {
     'no-restricted-syntax': [
       'error',

@@ -8,6 +8,12 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
+jest.mock('nativewind', () => ({
+  useColorScheme: jest.fn(() => ({ colorScheme: 'light', setColorScheme: jest.fn() })),
+  setColorScheme: jest.fn(),
+  vars: (v: object) => v,
+}));
+
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn().mockResolvedValue(undefined),
   hideAsync: jest.fn().mockResolvedValue(undefined),

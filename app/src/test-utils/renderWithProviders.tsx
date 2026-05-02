@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, type RenderOptions } from '@testing-library/react-native';
 import { ThemeContext, type ThemeContextValue } from '@/theme/ThemeContext';
 import { lightTheme } from '@/theme/tokens';
+import { SidePanelProvider } from '@/context/SidePanelContext';
 
 function makeQueryClient(): QueryClient {
   return new QueryClient({
@@ -27,7 +28,9 @@ function AllProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeContext.Provider value={stubThemeValue}>
-        {children}
+        <SidePanelProvider>
+          {children}
+        </SidePanelProvider>
       </ThemeContext.Provider>
     </QueryClientProvider>
   );
