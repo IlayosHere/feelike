@@ -1,0 +1,13 @@
+# Copy this file to terraform.tfvars and fill in the values.
+# Never commit terraform.tfvars — it is gitignored.
+#
+# Sensitive variables (db_password, jwt_secret) should be supplied via
+# environment variables instead of this file:
+#   export TF_VAR_db_password="your-strong-password"
+#   export TF_VAR_jwt_secret="your-jwt-secret"
+
+project_id   = "feelike-prod"
+region       = "europe-west1"
+github_repo  = "YourGitHubUsername/feelike"
+db_tier      = "db-g1-small"
+cors_origins = "https://feelike.app"

@@ -1,0 +1,8 @@
+# Rename this file to backend.tf (or uncomment the block in main.tf) after
+# creating the GCS bucket. See bootstrap instructions in main.tf.
+terraform {
+  backend "gcs" {
+    bucket = "feelike-prod-tfstate"
+    prefix = "terraform/state"
+  }
+}
