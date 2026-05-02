@@ -90,7 +90,7 @@ describe('CaptureScreen', () => {
 
     await act(async () => {});
 
-    const saveButton = getByRole('button', { name: 'Save' });
+    const saveButton = getByRole('button', { name: 'Save entry' });
     expect(saveButton.props.accessibilityState?.disabled).toBe(true);
   });
 
@@ -103,7 +103,7 @@ describe('CaptureScreen', () => {
       fireEvent.changeText(getByLabelText('Journal entry'), 'Today was a good day.');
     });
 
-    const saveButton = getByRole('button', { name: 'Save' });
+    const saveButton = getByRole('button', { name: 'Save entry' });
     expect(saveButton.props.accessibilityState?.disabled).not.toBe(true);
   });
 
@@ -149,7 +149,13 @@ describe('CaptureScreen', () => {
 
     await act(async () => {});
 
-    const tagInput = getByLabelText('Add tag');
+    // First open the tag panel by pressing the "Add tag" button
+    await act(async () => {
+      fireEvent.press(getByLabelText('Add tag'));
+    });
+
+    // Now the search input is visible
+    const tagInput = getByLabelText('Tag search input');
 
     await act(async () => {
       fireEvent.changeText(tagInput, 'gratitude');
@@ -160,7 +166,6 @@ describe('CaptureScreen', () => {
     });
 
     // TagChip renders with an accessible remove button labelled "Remove tag <name>".
-    // After addTag the chip should appear in the rendered tag list.
     const removeButton = await findByLabelText('Remove tag gratitude');
     expect(removeButton).toBeTruthy();
   });

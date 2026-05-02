@@ -6,6 +6,7 @@ module.exports = {
     'import/ignore': ['node_modules'],
   },
   rules: {
+    'import/namespace': 'off',
     'no-restricted-syntax': [
       'error',
       {
