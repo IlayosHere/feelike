@@ -1,0 +1,21 @@
+# Secrets — never bake into image
+.env
+*.env
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Test artefacts — not needed at runtime
+tests/
+.pytest_cache/
+
+# Distribution metadata
+*.egg-info/
+dist/
+build/
+
+# Editor / OS noise
+.DS_Store
+*.swp

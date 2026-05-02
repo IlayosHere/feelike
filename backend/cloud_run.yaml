@@ -1,0 +1,44 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: feelike-api
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "5"
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/vpc-access-connector: projects/PROJECT_ID/locations/europe-west1/connectors/feelike-connector
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: feelike-api-sa@PROJECT_ID.iam.gserviceaccount.com
+      containers:
+        - image: europe-west1-docker.pkg.dev/PROJECT_ID/feelike/api:IMAGE_TAG
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: feelike_database_url
+                  key: latest
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: feelike_jwt_secret
+                  key: latest
+            - name: TOKEN_EXPIRE_HOURS
+              value: "168"
+            - name: CORS_ORIGINS
+              value: "https://feelike.app"
+            - name: LOG_LEVEL
+              value: "INFO"
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
