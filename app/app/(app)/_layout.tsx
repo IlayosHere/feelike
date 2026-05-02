@@ -9,7 +9,7 @@ export default function AppLayout() {
 
   useEffect(() => {
     if (!isLoading && !token) {
-      router.replace('/(auth)/');
+      router.replace('/(auth)/index' as any);
     }
   }, [isLoading, token, router]);
 

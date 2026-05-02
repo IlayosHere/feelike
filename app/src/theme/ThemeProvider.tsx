@@ -11,7 +11,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme as useNativeWindColorScheme } from 'nativewind';
 import { ThemeContext } from './ThemeContext';
 import { darkTheme, lightTheme } from './tokens';
-import type { ThemeMode } from './types';
+import type { ThemeMode, ResolvedTheme } from './types';
 
 // Block the splash screen until the saved preference is loaded.
 SplashScreen.preventAutoHideAsync();
@@ -38,7 +38,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       ? (systemScheme === 'dark' ? 'dark' : 'light')
       : mode;
 
-  const theme = resolvedMode === 'dark' ? darkTheme : lightTheme;
+  const theme: ResolvedTheme = resolvedMode === 'dark' ? (darkTheme as unknown as ResolvedTheme) : lightTheme;
 
   // Shared value: 0 = light, 1 = dark
   const darkProgress = useSharedValue(resolvedMode === 'dark' ? 1 : 0);
@@ -107,7 +107,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <ThemeContext.Provider value={{ mode, setMode, resolvedMode, theme }}>
       <Animated.View
         className="flex-1 bg-bg"
-        style={[animatedStyle, { ...(Platform.OS === 'web' ? { height: '100vh' } : {}) }]}
+        style={[animatedStyle, (Platform.OS === 'web' ? { height: '100vh' as unknown as number } : undefined)]}
       >
         {children}
       </Animated.View>

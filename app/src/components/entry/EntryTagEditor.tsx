@@ -15,7 +15,8 @@ export function EntryTagEditor({ tags, onAdd, onRemove }: EntryTagEditorProps) {
   const [input, setInput] = useState('');
   const inputRef = useRef<TextInput>(null);
 
-  const { suggestions, showDropdown } = useTagAutocomplete(input, tags);
+  const { suggestions } = useTagAutocomplete(input, tags);
+  const showDropdown = suggestions.length > 0 && input.trim().length > 0;
 
   const handleSubmit = () => {
     const trimmed = input.trim();

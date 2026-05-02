@@ -129,7 +129,7 @@ export function SettingsScreen() {
           style: 'destructive',
           onPress: () => {
             void clearToken();
-            router.replace('/(auth)/');
+            router.replace('/(auth)/index' as any);
           },
         },
       ],
