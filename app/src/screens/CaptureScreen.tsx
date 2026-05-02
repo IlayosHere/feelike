@@ -130,7 +130,7 @@ export function CaptureScreen() {
             end={{ x: 1, y: 0 }}
             style={{ paddingVertical: 16, alignItems: 'center', justifyContent: 'center' }}
           >
-            <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '700' }}>
+            <Text style={{ color: theme.textOnAccent, fontSize: 16, fontWeight: '700' }}>
               {saveSuccess ? '✓ Saved' : 'Save entry'}
             </Text>
           </LinearGradient>

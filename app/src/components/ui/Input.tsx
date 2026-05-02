@@ -9,6 +9,7 @@ import {
   type ReturnKeyTypeOptions,
   View,
 } from 'react-native';
+import { useTheme } from '@/theme/useTheme';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -50,6 +51,7 @@ export function Input({
   autoComplete,
   keyboardType,
 }: InputProps) {
+  const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
   const [hidden, setHidden] = useState(secureTextEntry);
   const translateX = useSharedValue(0);
@@ -104,7 +106,7 @@ export function Input({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#9B9BAD"
+          placeholderTextColor={theme.textMuted}
           secureTextEntry={hidden}
           autoFocus={autoFocus}
           returnKeyType={returnKeyType}

@@ -19,6 +19,7 @@ import { renderWithProviders } from '@/test-utils/renderWithProviders';
 // ---------------------------------------------------------------------------
 
 jest.mock('@react-native-async-storage/async-storage', () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
@@ -32,6 +33,7 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('expo-linear-gradient', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
   const { View } = require('react-native');
   return {
     LinearGradient: ({ children, ...props }: React.PropsWithChildren<object>) => (
@@ -41,6 +43,7 @@ jest.mock('expo-linear-gradient', () => {
 });
 
 jest.mock('react-native-reanimated', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
   const Reanimated = require('react-native-reanimated/mock');
   Reanimated.useAnimatedStyle = (fn: () => object) => fn();
   return Reanimated;

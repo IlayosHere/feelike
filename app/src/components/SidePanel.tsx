@@ -82,14 +82,14 @@ function ThemeSegment({
               backgroundColor: active ? theme.accent : 'transparent',
             }}
           >
-            <Text style={{ fontSize: 13, color: active ? '#FFFFFF' : theme.textSecondary }}>
+            <Text style={{ fontSize: 13, color: active ? theme.textOnAccent : theme.textSecondary }}>
               {opt.icon}
             </Text>
             <Text
               style={{
                 fontSize: 13,
                 fontWeight: '500',
-                color: active ? '#FFFFFF' : theme.textSecondary,
+                color: active ? theme.textOnAccent : theme.textSecondary,
               }}
             >
               {opt.label}

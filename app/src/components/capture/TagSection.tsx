@@ -5,6 +5,7 @@ import { useTheme } from '@/theme/useTheme';
 import { useTagAutocomplete } from '@/hooks/useTagAutocomplete';
 
 // Purple accent for the "create" button — same in both modes
+// eslint-disable-next-line no-restricted-syntax
 const PURPLE_ACCENT = '#7C5CFC';
 
 const TAG_COLORS = ['pink', 'purple', 'blue', 'green'] as const;
@@ -48,7 +49,6 @@ export function TagSection() {
   const { theme } = useTheme();
   const inputRef = useRef<TextInput>(null);
   const [expanded, setExpanded] = React.useState(false);
-  const [focused, setFocused] = React.useState(false);
 
   const { suggestions, hasNoMatch } = useTagAutocomplete(tagInput, tags);
 
@@ -61,14 +61,12 @@ export function TagSection() {
     if (tagInput.trim()) addTag(tagInput.trim());
     setTagInput('');
     setExpanded(false);
-    setFocused(false);
   };
 
   const handleCreateNew = () => {
     addTag(tagInput.trim());
     setTagInput('');
     setExpanded(false);
-    setFocused(false);
   };
 
   return (
@@ -99,11 +97,7 @@ export function TagSection() {
         // Shadow wrapper (overflow visible so shadow renders on iOS)
         <View style={{
           borderRadius: 24,
-          shadowColor: '#7F7FD5',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.10,
-          shadowRadius: 14,
-          elevation: 4,
+          ...theme.shadowMd,
         }}>
         {/* Clip wrapper (overflow hidden to clip children to border-radius) */}
         <View style={{
@@ -180,8 +174,6 @@ export function TagSection() {
                 value={tagInput}
                 onChangeText={setTagInput}
                 onSubmitEditing={handleClose}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
                 placeholder="search or create tag…"
                 placeholderTextColor={theme.textMuted}
                 returnKeyType="done"
@@ -205,7 +197,7 @@ export function TagSection() {
                 create new tag
               </Text>
               <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: PURPLE_ACCENT, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontSize: 14, color: '#FFFFFF', lineHeight: 20, marginTop: -1 }}>+</Text>
+                <Text style={{ fontSize: 14, color: theme.textOnAccent, lineHeight: 20, marginTop: -1 }}>+</Text>
               </View>
             </Pressable>
           )}

@@ -15,7 +15,7 @@ export function GradientText({ children, from, to, style }: Props) {
         style={[
           style,
           {
-            // @ts-ignore — web-only CSS properties
+            // @ts-expect-error — web-only CSS properties
             background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',

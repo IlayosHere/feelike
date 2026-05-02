@@ -7,6 +7,7 @@ module.exports = {
   },
   rules: {
     'import/namespace': 'off',
+    'import/no-unresolved': 'off',
     'no-restricted-syntax': [
       'error',
       {

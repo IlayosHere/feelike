@@ -17,6 +17,7 @@ import { renderWithProviders } from '@/test-utils/renderWithProviders';
 // ---------------------------------------------------------------------------
 
 jest.mock('@react-native-async-storage/async-storage', () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
@@ -26,6 +27,7 @@ jest.mock('expo-splash-screen', () => ({
 }));
 
 jest.mock('expo-linear-gradient', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
   const { View } = require('react-native');
   return {
     LinearGradient: ({ children, ...props }: React.PropsWithChildren<object>) => (
