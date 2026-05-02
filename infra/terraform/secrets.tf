@@ -6,6 +6,8 @@ resource "google_secret_manager_secret" "jwt_secret" {
   replication {
     auto {}
   }
+
+  depends_on = [google_project_service.apis]
 }
 
 resource "google_secret_manager_secret_version" "jwt_secret" {
@@ -27,6 +29,8 @@ resource "google_secret_manager_secret" "db_password" {
   replication {
     auto {}
   }
+
+  depends_on = [google_project_service.apis]
 }
 
 resource "google_secret_manager_secret_version" "db_password" {
@@ -50,6 +54,8 @@ resource "google_secret_manager_secret" "database_url" {
   replication {
     auto {}
   }
+
+  depends_on = [google_project_service.apis]
 }
 
 resource "google_secret_manager_secret_version" "database_url" {

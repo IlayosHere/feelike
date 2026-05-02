@@ -20,10 +20,10 @@ terraform {
   # locally. A second apply from any other machine will attempt to recreate ALL
   # resources including the Cloud SQL instance. Do not skip step 2.
   #
-  # backend "gcs" {
-  #   bucket = "feelike-prod-tfstate"
-  #   prefix = "terraform/state"
-  # }
+  backend "gcs" {
+    bucket = "feelike-prod-tfstate"
+    prefix = "terraform/state"
+  }
 }
 
 provider "google" {

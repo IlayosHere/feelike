@@ -1,7 +1,4 @@
-output "cloud_run_url" {
-  description = "Public HTTPS URL of the feelike-api Cloud Run service."
-  value       = google_cloud_run_v2_service.api.uri
-}
+# cloud_run_url output added back after first CI/CD deploy creates the service.
 
 output "artifact_registry_url" {
   description = "Base URL of the Artifact Registry Docker repository (append /api:<tag> for full image references)."

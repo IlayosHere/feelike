@@ -22,14 +22,17 @@ resource "google_sql_database_instance" "db" {
       enabled                        = true
       start_time                     = "03:00"
       point_in_time_recovery_enabled = true
-      transaction_log_retention_days = 7
+      transaction_log_retention_days = 3
       backup_retention_settings {
         retained_backups = 7
       }
     }
   }
 
-  depends_on = [google_service_networking_connection.private_vpc_connection]
+  depends_on = [
+    google_service_networking_connection.private_vpc_connection,
+    google_project_service.apis,
+  ]
 }
 
 resource "google_sql_database" "feelike" {
