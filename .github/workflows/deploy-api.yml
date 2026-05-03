@@ -60,10 +60,7 @@ jobs:
 
       - name: Smoke test — verify /healthz returns 200
         run: |
-          SERVICE_URL=$(gcloud run services describe feelike-api \
-            --region ${{ secrets.GCP_REGION }} \
-            --project ${{ secrets.GCP_PROJECT_ID }} \
-            --format='value(status.url)')
+          SERVICE_URL=$(gcloud run services describe feelike-api --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }} --format='value(status.url)')
           echo "Service URL: $SERVICE_URL"
           for i in $(seq 1 12); do
             echo "Attempt $i/12..."
