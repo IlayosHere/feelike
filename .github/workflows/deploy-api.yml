@@ -54,13 +54,6 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.ARTIFACT_REGISTRY_URL }}/api:${{ github.sha }}
 
-      - name: Run database migrations
-        run: |
-          gcloud run jobs delete feelike-migrate-${{ github.sha }} --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }} --quiet 2>/dev/null || true
-          gcloud run jobs create feelike-migrate-${{ github.sha }} --image ${{ secrets.ARTIFACT_REGISTRY_URL }}/api:${{ github.sha }} --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }} --service-account ${{ secrets.CLOUD_RUN_SA_EMAIL }} --set-secrets "DATABASE_URL=feelike_database_url:latest" --command "alembic" --args "upgrade,head" --max-retries 1 --task-timeout 120s --quiet
-          gcloud run jobs execute feelike-migrate-${{ github.sha }} --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }} --wait --quiet
-          gcloud run jobs delete feelike-migrate-${{ github.sha }} --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }} --quiet
-
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy feelike-api --image ${{ secrets.ARTIFACT_REGISTRY_URL }}/api:${{ github.sha }} --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }} --service-account ${{ secrets.CLOUD_RUN_SA_EMAIL }} --quiet
