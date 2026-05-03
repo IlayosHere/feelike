@@ -15,6 +15,7 @@ export function GradientText({ children, from, to, style }: Props) {
         style={[
           style,
           {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore — web-only CSS properties not in RN types
             background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
             WebkitBackgroundClip: 'text',
